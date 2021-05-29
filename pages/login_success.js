@@ -1,18 +1,35 @@
 
 import Layout from '../components/layout'
-import Router from 'next/router'
-import {useEffect} from 'react'
+import { useRouter} from 'next/router'
+import {useEffect, useState} from 'react'
 import Image from 'next/image'
 import utilStyles from '../styles/utils.module.css'
 
 function Signup() {
-
-  useEffect(() => {
-    setTimeout(
-        () => {Router.push('/')},
-        3000,
-    )
-  });
+  const r = useRouter()
+  if (r.query.next_step === "done") {
+    useEffect(() => {
+      setTimeout(
+          () => {r.push('/')},
+          3000,
+      )
+    });
+  } else if (r.query.next_step === "biometrics_face"){
+    useEffect(() => {
+      setTimeout(
+          () => {r.push('/login_face?user='+r.query.user+'&token='+r.query.token)},
+          3000,
+      )
+    });
+  }
+  else if (r.query.next_step === "biometrics_voice"){
+    useEffect(() => {
+      setTimeout(
+          () => {r.push('/login_voice'+r.query.user+'&token='+r.query.token)},
+          3000,
+      )
+    });
+  }
 
   return (
     <Layout transition>
@@ -20,7 +37,7 @@ function Signup() {
         display:"flex",
         justifyContent:"center",
     }}>
-    Login success, redirecting to dashboard page
+    {r.query.next_step==="done" ? <>Login success, redirecting to dashboard page</> : <>MFA enabled, directing you to next step</>}
     </div>
     <>
     <div style={{

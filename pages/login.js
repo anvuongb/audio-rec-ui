@@ -30,8 +30,12 @@ function Login() {
       const r = await response.json()
       const result_code = r.result_code
       const result_message = r.result_message
-      if (result_code == 1) {
-        Router.push('/login_success')
+      const next_step = r.next_step
+      const token = r.token
+      if (result_code == 1 && next_step == "done") {
+        Router.push('/login_success?next_step=done&user='+username+'&token='+token)
+      } else if (result_code == 1 && next_step == "biometrics_face") {
+        Router.push('/login_success?next_step=biometrics_face&user='+username+'&token='+token)
       } else {
         setUserData({ ...userData, error: result_message + " code " + result_code })
       }
