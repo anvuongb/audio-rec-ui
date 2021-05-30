@@ -10,7 +10,7 @@ function Signup() {
   if (r.query.next_step === "done") {
     useEffect(() => {
       setTimeout(
-          () => {r.push('/')},
+          () => {r.push('/profile?user='+r.query.user+'&token='+r.query.token)},
           3000,
       )
     });
