@@ -37,7 +37,7 @@ function Signup() {
     const password = userData.password
 
     try {
-      const response = await fetch('http://192.168.1.6:8500/api/create', {
+      const response = await fetch('http://192.168.1.6:8580/api/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({"request_id":"test", "user_name":username, "user_passwd":password }),

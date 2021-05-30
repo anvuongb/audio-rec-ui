@@ -18,7 +18,7 @@ function Login() {
     const password = userData.password
 
     try {
-      const response = await fetch('http://192.168.1.6:8500/api/login', {
+      const response = await fetch('http://192.168.1.6:8580/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({"request_id":"test", "user_name":username, "user_passwd":password }),
@@ -32,9 +32,9 @@ function Login() {
       const result_message = r.result_message
       const next_step = r.next_step
       const token = r.token
-      if (result_code == 1 && next_step == "done") {
+      if (result_code === 1 && next_step === "done") {
         Router.push('/login_success?next_step=done&user='+username+'&token='+token)
-      } else if (result_code == 1 && next_step == "biometrics_face") {
+      } else if (result_code === 1 && next_step === "biometrics_face") {
         Router.push('/login_success?next_step=biometrics_face&user='+username+'&token='+token)
       } else {
         setUserData({ ...userData, error: result_message + " code " + result_code })

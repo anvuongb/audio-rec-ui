@@ -7,29 +7,12 @@ import utilStyles from '../styles/utils.module.css'
 
 function Signup() {
   const r = useRouter()
-  if (r.query.next_step === "done") {
-    useEffect(() => {
-      setTimeout(
-          () => {r.push('/')},
-          3000,
-      )
-    });
-  } else if (r.query.next_step === "biometrics_face"){
-    useEffect(() => {
-      setTimeout(
-          () => {r.push('/login_face?user='+r.query.user+'&token='+r.query.token)},
-          3000,
-      )
-    });
-  }
-  else if (r.query.next_step === "biometrics_voice"){
-    useEffect(() => {
-      setTimeout(
-          () => {r.push('/login_voice'+r.query.user+'&token='+r.query.token)},
-          3000,
-      )
-    });
-  }
+  useEffect(() => {
+    setTimeout(
+        () => {r.push('/login')},
+        3000,
+    )
+  });
 
   return (
     <Layout transition>
@@ -37,7 +20,7 @@ function Signup() {
         display:"flex",
         justifyContent:"center",
     }}>
-    {r.query.next_step==="done" ? <>Login success, redirecting to dashboard page</> : <>Your account has MFA enabled, directing you to next step</>}
+    Failed too many times, re-directing you to Login page
     </div>
     <>
     <div style={{
@@ -48,6 +31,21 @@ function Signup() {
       <Image
         priority
         src="/images/loading.gif"
+        className={utilStyles.borderCircle}
+        height={100}
+        width={100}
+        />
+    </div>
+    </>
+    <>
+    <div style={{
+        display:"flex",
+        justifyContent:"center",
+    }}>
+        
+      <Image
+        priority
+        src="/images/broken-link.png"
         className={utilStyles.borderCircle}
         height={100}
         width={100}
