@@ -5,7 +5,7 @@ import {useEffect, useState} from 'react'
 import Image from 'next/image'
 import utilStyles from '../styles/utils.module.css'
 
-function LoginFail() {
+function MFASuccess() {
   const r = useRouter()
   useEffect(() => {
     setTimeout(
@@ -20,7 +20,7 @@ function LoginFail() {
         display:"flex",
         justifyContent:"center",
     }}>
-    Failed too many times, re-directing you to Login page
+    Add MFA success, redirecting to login page
     </div>
     <>
     <div style={{
@@ -31,21 +31,6 @@ function LoginFail() {
       <Image
         priority
         src="/images/loading.gif"
-        className={utilStyles.borderCircle}
-        height={100}
-        width={100}
-        />
-    </div>
-    </>
-    <>
-    <div style={{
-        display:"flex",
-        justifyContent:"center",
-    }}>
-        
-      <Image
-        priority
-        src="/images/broken-link.png"
         className={utilStyles.borderCircle}
         height={100}
         width={100}
@@ -66,4 +51,4 @@ function LoginFail() {
   )
 }
 
-export default LoginFail
+export default MFASuccess

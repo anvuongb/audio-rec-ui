@@ -27,6 +27,7 @@ export default function Layout({ children, home, login, signup, face, transition
       </Head>
       <header className={styles.header}>
         {home ? (
+          !profile &&
           <>
             <Image
               priority
@@ -39,6 +40,7 @@ export default function Layout({ children, home, login, signup, face, transition
             <h1 className={utilStyles.heading2Xl}>{name}</h1>
           </>
         ) : (
+          !profile &&
           <>
             <Link href="/">
               <a>
@@ -59,6 +61,33 @@ export default function Layout({ children, home, login, signup, face, transition
             </h2>
           </>
         )}
+        {profile ? (
+          <>
+          <>
+            <Link href="/">
+              <a>
+                <Image
+                  priority
+                  src="/images/logo_2.png"
+                  className={utilStyles.borderCircle}
+                  height={108}
+                  width={108}
+                  alt={name}
+                />
+              </a>
+            </Link>
+            <h2 className={utilStyles.headingLg}>
+              <Link href="/">
+                <a className={utilStyles.colorInherit}>{name} profile page</a>
+              </Link>
+            </h2>
+          </>
+          </>
+        ) : (
+          <>
+          </>
+        )
+        }
         {face ? (
           <>
           MFA Face login page

@@ -5,7 +5,7 @@ import {useEffect, useState} from 'react'
 import Image from 'next/image'
 import utilStyles from '../styles/utils.module.css'
 
-function Signup() {
+function LoginSuccess() {
   const r = useRouter()
   if (r.query.next_step === "done") {
     useEffect(() => {
@@ -68,4 +68,4 @@ function Signup() {
   )
 }
 
-export default Signup
+export default LoginSuccess

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Router from 'next/router'
 import Layout from '../components/layout'
+import { v4 as uuidv4 } from 'uuid';
 
 
 function Login() {
@@ -19,9 +20,9 @@ function Login() {
 
     try {
       const response = await fetch('http://192.168.1.6:8580/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({"request_id":"test", "user_name":username, "user_passwd":password }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "user_passwd":password }),
       })
 
       if (response.status !== 200) {

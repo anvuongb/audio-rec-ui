@@ -4,15 +4,11 @@ import Layout from '../components/layout'
 import Webcam from "react-webcam";
 import utilStyles from '../styles/utils.module.css'
 import Image from 'next/image'
+import { v4 as uuidv4 } from 'uuid';
 
 
 function Login() {
   const router = useRouter() 
-  const videoConstraints = {
-    width: 1280,
-    height: 720,
-    facingMode: "user"
-  };
 
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
@@ -48,9 +44,9 @@ function Login() {
 
     try {
       const response = await fetch('http://192.168.1.6:8580/api/login/face', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
-      body: JSON.stringify({"request_id":"test", "user_name":username, "base64_image_data":imageBase64 }),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+        body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "base64_image_data":imageBase64 }),
       })
 
       if (response.status !== 200) {
