@@ -36,7 +36,7 @@ function Profile() {
   const fetchData = async() => {
     try {
       const response = await axios.get(
-        'http://192.168.1.6:8580/api/history/login/records',
+        '/api/history/login/records',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -63,7 +63,7 @@ function Profile() {
   const fetchMfaMethod = async() => {
     try {
       const response = await axios.get(
-        'http://192.168.1.6:8580/api/history/login/mfa',
+        '/api/history/login/mfa',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -121,7 +121,7 @@ function Profile() {
 
     try {
       const response = await axios.get(
-        'http://192.168.1.6:8580/api/history/mfa/records',
+        '/api/history/mfa/records',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -158,7 +158,7 @@ function Profile() {
     const token = router.query.token
 
     try {
-      const response = await fetch('http://192.168.1.6:8580/api/create/face', {
+      const response = await fetch('/api/create/face', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
         body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "base64_image_data":imageBase64 }),

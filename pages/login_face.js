@@ -43,7 +43,7 @@ function Login() {
     const token = router.query.token
 
     try {
-      const response = await fetch('http://192.168.1.6:8580/api/login/face', {
+      const response = await fetch('/api/login/face', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
         body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "base64_image_data":imageBase64 }),
