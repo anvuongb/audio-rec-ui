@@ -38,7 +38,6 @@ function Login() {
     setImgSrc(imageSrc);
     
     const imageBase64 = imageSrc.split(";base64,")[1]
-    console.log(imageBase64);
 
     const username = router.query.user
     const token = router.query.token

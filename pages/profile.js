@@ -9,11 +9,20 @@ import Image from 'next/image'
 import Popup from 'reactjs-popup';
 import urlBase from '../constant/url'
 
+import { useReactMediaRecorder } from "react-media-recorder";
 
 function Profile() {
   const router = useRouter()
   const [data, setData] = useState(null);
   const webcamRef = useRef(null);
+
+  const {
+    status,
+    startRecording,
+    stopRecording,
+    mediaBlobUrl,
+    clearBlobUrl,
+  } = useReactMediaRecorder({ video: false });
 
   const [loading, setLoading] = useState(false);
   const [loadingMFA, setLoadingMFA] = useState(false);
@@ -21,6 +30,7 @@ function Profile() {
   const [dataFilter, setDataFilter] = useState(null);
   const [mfaMethod, setMfaMethod] = useState(null);
   const [showCam, setShowCam] = useState(false);
+  const [showVoice, setShowVoice] = useState(false);
   const [showCamRemoveFaceMFA, setShowCamRemoveFaceMFA] = useState(false);
   const [imgSrc, setImgSrc] = useState(null);
   const [retryButtonSubmitFace, setRetryButtonSubmitFace] = useState(false);
@@ -141,7 +151,23 @@ function Profile() {
     setLoadingPopupFace(false);
   }
 
-  async function handleEnableFaceMfa(event) {
+  function handleEnableVoiceMfa(event) {
+    event.preventDefault()
+    if (showVoice) {
+      setUserData({ ...userData, errorVoice: '' })
+      clearBlobUrl();
+    }
+    setShowVoice(!showVoice);
+
+    // disable face mfa
+    setUserData({ ...userData, errorFace: '' })
+    setShowCam(false);
+    setLoading(false);
+    setImgSrc(null);
+    setRetryButtonSubmitFace(false);
+  } 
+
+  function handleEnableFaceMfa(event) {
     event.preventDefault()
     if (showCam) {
       setUserData({ ...userData, errorFace: '' })
@@ -150,6 +176,12 @@ function Profile() {
     setLoading(false);
     setImgSrc(null);
     setRetryButtonSubmitFace(false);
+
+    // disable voice mfa
+    setUserData({ ...userData, errorVoice: '' })
+    clearBlobUrl();
+    setShowVoice(false);
+
   }
 
   function handleRetrySubmitFace() {
@@ -343,7 +375,7 @@ function Profile() {
                 display:"flex",
                 justifyContent:"center",
             }}>
-      {mfaMethod === 1 ? (<><button type="submit" onClick={handleEnableFaceMfa}>Enable Face MFA</button> <button type="submit">Enable Voice MFA</button></>):
+      {mfaMethod === 1 ? (<><button type="submit" onClick={handleEnableFaceMfa}>Enable Face MFA</button> <button type="submit" onClick={handleEnableVoiceMfa}>Enable Voice MFA</button></>):
       (<><button type="submit" onClick={handleViewFaceMFA}>View your MFA records</button>
        <button type="submit" onClick={handleRemoveFaceMFA}>Remove your MFA records</button></>
       ) }
@@ -371,6 +403,56 @@ function Profile() {
         <img 
         src={`data:image/jpeg;base64,${faceMFAData.image}`}
       /></form></div>}
+
+    {/* SUBMIT VOICE FOR MFA */}
+    {showVoice && 
+      <div className="face">
+          <div>
+            <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+              <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;đây là giọng nói của tôi&nbsp;&nbsp;</h2>
+            </div>
+            <div style={{
+                display:"flex",
+                justifyContent:"center",
+            }}>
+              {status!=="recording" && !mediaBlobUrl && <button onClick={startRecording}>Start Recording</button>}
+            </div>
+            <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+              {mediaBlobUrl && status!=="recording" && <audio src={mediaBlobUrl} controls/>}
+            </div>
+            {status==="recording" && 
+              <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+                  
+                <Image
+                  priority
+                  src="/images/recording.gif"
+                  className={utilStyles.borderCircle}
+                  height={37}
+                  width={49}
+                  />
+              </div>}
+              <br/>
+              <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+                {status==="recording" && <button onClick={stopRecording}>Stop Recording</button>}
+                {mediaBlobUrl && status!=="recording" && <button>Submit Voice</button>}{mediaBlobUrl &&status!=="recording" && <button onClick={startRecording}>Re-Record</button>}
+              </div>
+            
+          </div>
+      </div>
+    }
+    {/* END SUBMIT VOICE FOR MFA */}
 
     {/* SUBMIT FACE FOR MFA */}
     {(showCam || loading || userData.errorFace) &&
