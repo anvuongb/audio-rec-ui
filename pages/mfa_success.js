@@ -7,12 +7,14 @@ import utilStyles from '../styles/utils.module.css'
 
 function MFASuccess() {
   const r = useRouter()
-  useEffect(() => {
-    setTimeout(
-        () => {r.push('/login')},
-        3000,
-    )
-  });
+  if (r.query.op === "add" || r.query.op === "remove"){
+    useEffect(() => {
+      setTimeout(
+          () => {r.push('/login')},
+          3000,
+      )
+    });
+  }
 
   return (
     <Layout transition>
@@ -20,7 +22,8 @@ function MFASuccess() {
         display:"flex",
         justifyContent:"center",
     }}>
-    Add MFA success, redirecting to login page
+    {r.query.op === "add" && <>Add MFA success, redirecting to login page</> } 
+    {r.query.op === "remove" &&(<>Remove MFA success, redirecting to login page</>)}
     </div>
     <>
     <div style={{
