@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Router from 'next/router'
 import Layout from '../components/layout'
+import urlBase from '../constant/url'
 
 function Signup() {
   const [userData, setUserData] = useState({
@@ -37,7 +38,7 @@ function Signup() {
     const password = userData.password
 
     try {
-      const response = await fetch('/api/create', {
+      const response = await fetch(urlBase + '/api/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({"request_id":"test", "user_name":username, "user_passwd":password }),

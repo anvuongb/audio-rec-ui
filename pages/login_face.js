@@ -5,6 +5,7 @@ import Webcam from "react-webcam";
 import utilStyles from '../styles/utils.module.css'
 import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid';
+import urlBase from '../constant/url'
 
 
 function Login() {
@@ -43,7 +44,7 @@ function Login() {
     const token = router.query.token
 
     try {
-      const response = await fetch('/api/login/face', {
+      const response = await fetch(urlBase + '/api/login/face', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
         body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "base64_image_data":imageBase64 }),

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Router from 'next/router'
 import Layout from '../components/layout'
 import { v4 as uuidv4 } from 'uuid';
+import urlBase from '../constant/url'
 
 
 function Login() {
@@ -19,7 +20,7 @@ function Login() {
     const password = userData.password
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch(urlBase + '/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "user_passwd":password }),

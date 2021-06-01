@@ -6,6 +6,8 @@ import axios from 'axios'
 import Webcam from "react-webcam";
 import utilStyles from '../styles/utils.module.css'
 import Image from 'next/image'
+import Popup from 'reactjs-popup';
+import urlBase from '../constant/url'
 
 
 function Profile() {
@@ -23,6 +25,9 @@ function Profile() {
 
   const [showMFA, setShowMFA] = useState(false);
   const [faceMFAData, setFaceMFAData] = useState(null);
+  const [showFacePopup, setShowFacePopup] = useState(false);
+  const [showFacePopupData, setShowFacePopupData] = useState(null);
+  const [loadingPopupFace, setLoadingPopupFace] = useState(false);
 
   const username = router.query.user;
   const token = router.query.token;
@@ -32,11 +37,12 @@ function Profile() {
     errorMfa: '',
     errorFace: '',
     errorMfaRecord: '',
+    errorFacePopup: '',
   })
   const fetchData = async() => {
     try {
       const response = await axios.get(
-        '/api/history/login/records',
+        urlBase + '/api/history/login/records',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -48,7 +54,7 @@ function Profile() {
         }
       );
         const dataF = response.data.map((d) => Object.assign({}, ...
-            Object.entries(d).filter(([k,v]) => k==='login_method' || k==='result_message' || k==='created_at').map(([k,v]) => ({[k]:v}))
+            Object.entries(d).filter(([k,v]) => k==='login_method' || k==='result_message' || k==='login_at' ||k==='face_id').map(([k,v]) => ({[k]:v}))
         ))
         setData(response.data)
         setDataFilter(dataF)
@@ -56,14 +62,15 @@ function Profile() {
     catch (error) {
       console.error(error)
       setData(null);
-      setUserData({ ...userData, errorMfa: error.message })
+      setUserData({ ...userData, errorMfa: error.message });
+      router.push('/login_fail');
     }
   }
 
   const fetchMfaMethod = async() => {
     try {
       const response = await axios.get(
-        '/api/history/login/mfa',
+        urlBase + '/api/history/login/mfa',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -80,7 +87,8 @@ function Profile() {
     catch (error) {
       console.error(error)
       setMfaMethod(null);
-      setUserData({ ...userData, error: error.message })
+      setUserData({ ...userData, error: error.message });
+      router.push('/login_fail');
     }
   }
 
@@ -93,8 +101,47 @@ function Profile() {
 
   }, [username, token]);
 
+  const closeFacePopup = () => {
+    setShowFacePopup(false);
+    setShowFacePopupData(null);
+    setLoadingPopupFace(false);
+  }
+
+  async function handleShowFacePopup(faceId) {
+    setShowFacePopup(true);
+    setLoadingPopupFace(true);
+
+    const username = router.query.user
+    const token = router.query.token
+
+    try {
+      const response = await axios.get(
+        urlBase + '/api/history/face/image',
+        {
+          headers: {
+            'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
+          },
+          params: {
+            request_id: uuidv4(),
+            face_id: faceId,
+            username: username,
+          }
+        }
+      );
+
+      setShowFacePopupData(response.data)
+    } catch (error) {
+      console.error(error)
+      setUserData({ ...userData, errorFacePopup: error.message })
+    }
+    setLoadingPopupFace(false);
+  }
+
   async function handleEnableFaceMfa(event) {
     event.preventDefault()
+    if (showCam) {
+      setUserData({ ...userData, errorFace: '' })
+    }
     setShowCam(!showCam);
     setLoading(false);
     setImgSrc(null);
@@ -121,7 +168,7 @@ function Profile() {
 
     try {
       const response = await axios.get(
-        '/api/history/mfa/records',
+        urlBase + '/api/history/mfa/records',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -158,7 +205,7 @@ function Profile() {
     const token = router.query.token
 
     try {
-      const response = await fetch('/api/create/face', {
+      const response = await fetch(urlBase + '/api/create/face', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
         body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "base64_image_data":imageBase64 }),
@@ -166,14 +213,16 @@ function Profile() {
 
       if (response.status !== 200) {
         throw new Error(await response.text())
-      }
+      } 
       const r = await response.json()
       const result_code = r.result_code
       const result_message = r.result_message
       const accepted = r.accepted
       if (accepted) {
         router.push('/mfa_success')
-      } else {
+      } else if (result_message === 'token invalid') {
+        router.push('/login_fail') }
+      else {
         setUserData({ ...userData, errorFace: result_message + " code " + result_code })
         setRetryButton(true);
       }
@@ -292,15 +341,15 @@ function Profile() {
         <thead>
         <tr key={"header"}>
           {Object.keys(dataFilter[0]).map((key) => (
-            <th>{key !== "created_at" ? (<>{key}</>) : (<>login_time</>)}</th>
+            <th>{key}</th>
           ))}
         </tr>
         </thead>
         <tbody>
         {dataFilter.map((item) => (
-          <tr key={item.created_at}>
-            {Object.values(item).map((val) => (
-              <td>{val}</td>
+          <tr key={item.login_at}>
+            {Object.entries(item).map((v) => (
+              <td>{v[0] === "face_id" ? (<>{<a onClick={() => {handleShowFacePopup(v[1])}}>{v[1]}</a>}</>) : (<>{v[1]}</>)}</td>
             ))}
           </tr>
         ))}
@@ -308,7 +357,68 @@ function Profile() {
       </table>)}
         {userData.error && <p className="error">Error: {userData.error}</p>}
       </div>
+
+      {showFacePopup && 
+      <>
+      <div>
+        <Popup open={showFacePopup} closeOnDocumentClick onClose={closeFacePopup} position="center">
+        <div className="popup-content">
+          <a className="close" onClick={closeFacePopup}>
+            &times;
+          </a>
+          
+          {showFacePopupData && <img src={`data:image/jpeg;base64,${showFacePopupData.image}`}/>}
+
+          {loadingPopupFace && <div>
+            <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+              Fetching data ...
+            </div>
+            <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+                <Image
+                  priority
+                  src="/images/loading.gif"
+                  className={utilStyles.borderCircle}
+                  height={100}
+                  width={100}
+                  />
+            </div>
+            </div>
+            }
+
+        </div>
+        </Popup>
+        </div>
+        </>}
       <style jsx>{`
+        .popup-content {
+          margin: auto;
+          background: rgb(255, 255, 255);
+          width: 100%;
+          padding: 5px;
+          border: 2px solid #ccc;
+          border-radius: 8px;
+        }
+        .popup-arrow {
+          color: rgb(255, 255, 255);
+          
+        }
+        [role='tooltip'].popup-content {
+          width: 400px;
+          box-shadow: rgba(0, 0, 0, 1) 0px 0px 3px;
+        }
+
+        .popup-overlay {
+          background: rgba(0, 0, 0, 0.5);
+        }
+        [data-popup='tooltip'].popup-overlay {
+          background: transparent;
+        }
         .profile {
           margin: 0 auto;
           padding: 1rem;
