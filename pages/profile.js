@@ -200,6 +200,12 @@ function Profile() {
     setLoadingRemoveMFA(false);
     setImgSrc(null);
     setRetryButtonLoginFace(false);
+
+    // clear view MFA
+    setShowMFA(false);
+    setLoadingMFA(false);
+    setFaceMFAData(null);
+    setUserData({ ...userData, errorMfaRecord: "" })
   }
 
   function handleRetryRemoveFaceMF() {
@@ -216,6 +222,14 @@ function Profile() {
     setLoadingMFA(true);
     setFaceMFAData(null);
     setRetryButtonSubmitFace(false);
+    setUserData({ ...userData, errorMfaRecord: "" })
+
+    // clear remove MFA
+    setUserData({ ...userData, errorFaceLogin: '' });
+    setShowCamRemoveFaceMFA(false);
+    setLoadingRemoveMFA(false);
+    setImgSrc(null);
+    setRetryButtonLoginFace(false);
 
     const username = router.query.user
     const token = router.query.token
@@ -564,7 +578,7 @@ function Profile() {
     <br/>
     {userData.errorMfa && <p className="error">Error: {userData.errorMfa}</p>}
     
-    
+    {/* DISPLAY LOGIN RECORDS */}
      {username && 
      <div style={{
                 display:"flex",
@@ -588,7 +602,13 @@ function Profile() {
         {dataFilter.map((item) => (
           <tr key={item.login_at}>
             {Object.entries(item).map((v) => (
-              <td>{v[0] === "face_id" ? (<>{<a onClick={() => {handleShowFacePopup(v[1])}}>{v[1]}</a>}</>) : (<>{v[1]}</>)}</td>
+              <td>{v[0] === "face_id" ? (<>{<a onClick={() => {handleShowFacePopup(v[1])}}>{v[1]}</a>}</>) : (<>{v[1]==="ok" && <Image
+                  priority
+                  src="/images/green-tick.png"
+                  className={utilStyles.borderCircle}
+                  height={20}
+                  width={20}
+                  />}{v[1]!=="ok" && v[1]}</>)}</td>
             ))}
           </tr>
         ))}
@@ -634,6 +654,7 @@ function Profile() {
         </Popup>
         </div>
         </>}
+      {/* END DISPLAY LOGIN RECORDS */}
       <style jsx>{`
         .popup-content {
           margin: auto;
@@ -680,6 +701,9 @@ function Profile() {
           border: 1px solid black;
           margin: 0px 0px;
           padding: 5px 5px;
+        }
+        a { 
+          cursor: pointer; 
         }
         form {
           display: flex;
