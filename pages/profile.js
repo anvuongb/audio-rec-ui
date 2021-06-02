@@ -24,23 +24,28 @@ function Profile() {
     clearBlobUrl,
   } = useReactMediaRecorder({ video: false });
 
-  const [loading, setLoading] = useState(false);
+  const [loadingSubmitFace, setLoadingSubmitFace] = useState(false);
+  const [loadingSubmitVoice, setLoadingSubmitVoice] = useState(false);
   const [loadingMFA, setLoadingMFA] = useState(false);
   const [loadingRemoveMFA, setLoadingRemoveMFA] = useState(false);
+  const [loadingPopupFace, setLoadingPopupFace] = useState(false);
+
   const [dataFilter, setDataFilter] = useState(null);
   const [mfaMethod, setMfaMethod] = useState(null);
   const [showCam, setShowCam] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [showCamRemoveFaceMFA, setShowCamRemoveFaceMFA] = useState(false);
   const [imgSrc, setImgSrc] = useState(null);
+
   const [retryButtonSubmitFace, setRetryButtonSubmitFace] = useState(false);
   const [retryButtonLoginFace, setRetryButtonLoginFace] = useState(false);
+
+  const [retryButtonSubmitVoice, setRetryButtonSubmitVoice] = useState(false);
 
   const [showMFA, setShowMFA] = useState(false);
   const [faceMFAData, setFaceMFAData] = useState(null);
   const [showFacePopup, setShowFacePopup] = useState(false);
   const [showFacePopupData, setShowFacePopupData] = useState(null);
-  const [loadingPopupFace, setLoadingPopupFace] = useState(false);
 
   const username = router.query.user;
   const token = router.query.token;
@@ -153,49 +158,58 @@ function Profile() {
 
   function handleEnableVoiceMfa(event) {
     event.preventDefault()
-    if (showVoice) {
-      setUserData({ ...userData, errorVoice: '' })
-      clearBlobUrl();
-    }
+    setUserData({ ...userData, errorVoice: '' })
     setShowVoice(!showVoice);
+    stopRecording();
+    clearBlobUrl();
+    setLoadingSubmitVoice(false);
+    setRetryButtonSubmitVoice(false);
 
     // disable face mfa
     setUserData({ ...userData, errorFace: '' })
     setShowCam(false);
-    setLoading(false);
+    setLoadingSubmitFace(false);
     setImgSrc(null);
     setRetryButtonSubmitFace(false);
   } 
 
   function handleEnableFaceMfa(event) {
-    event.preventDefault()
-    if (showCam) {
-      setUserData({ ...userData, errorFace: '' })
-    }
+    setUserData({ ...userData, errorFace: '' });
     setShowCam(!showCam);
-    setLoading(false);
+    setLoadingSubmitFace(false);
     setImgSrc(null);
     setRetryButtonSubmitFace(false);
 
     // disable voice mfa
     setUserData({ ...userData, errorVoice: '' })
-    clearBlobUrl();
     setShowVoice(false);
+    stopRecording();
+    clearBlobUrl();
+    setLoadingSubmitVoice(false);
+    setRetryButtonSubmitVoice(false);
 
   }
 
+  function handleRetrySubmitVoice() {
+    setUserData({ ...userData, errorVoice: '' })
+    setShowVoice(true);
+    stopRecording();
+    clearBlobUrl();
+    setLoadingSubmitVoice(false);
+    setRetryButtonSubmitVoice(false);
+  }
+
   function handleRetrySubmitFace() {
-    setLoading(false);
+    setLoadingSubmitFace(false);
     setShowCam(true);
     setRetryButtonSubmitFace(false);
     setUserData({ ...userData, errorFace: "" })
+    setImgSrc(null);
   }
 
   async function handleRemoveFaceMFA(event) {
     event.preventDefault()
-    if (showCamRemoveFaceMFA) {
-      setUserData({ ...userData, errorFaceLogin: '' })
-    }
+    setUserData({ ...userData, errorFaceLogin: '' });
     setShowCamRemoveFaceMFA(!showCamRemoveFaceMFA);
     setLoadingRemoveMFA(false);
     setImgSrc(null);
@@ -257,10 +271,59 @@ function Profile() {
     setLoadingMFA(false);
   }
 
+  async function handleSubmitVoice(event) {
+    event.preventDefault()
+    setUserData({ ...userData, errorVoice: '' })
+    setLoadingSubmitVoice(true);
+    setShowVoice(false);
+
+    const username = router.query.user
+    const token = router.query.token
+    
+    let file = await fetch(mediaBlobUrl).then(r => r.blob());
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("request_id", uuidv4());
+    formData.append("username", username);
+    formData.append("sound_rate", 44100)
+
+
+    try {
+
+      const response = await fetch(urlBase + '/api/create/voice', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token},
+        body: formData,
+      })
+
+      if (response.status !== 200) {
+        throw new Error(await response.text())
+      } 
+      const r = await response.json()
+      const result_code = r.result_code
+      const result_message = r.result_message
+      const accepted = r.accepted
+      if (accepted) {
+        router.push('/mfa_success?op=add')
+      } else if (result_message === 'token invalid') {
+        router.push('/login_fail') }
+      else {
+        setUserData({ ...userData, errorVoice: result_message + " code " + result_code })
+        setRetryButtonSubmitVoice(true);
+      }
+    } catch (error) {
+      console.error(error)
+      setUserData({ ...userData, errorVoice: error.message })
+      setRetryButtonSubmitVoice(true);
+    }
+    setLoadingSubmitVoice(false)
+  }
+
   async function handleSubmitFace(event) {
     event.preventDefault()
     setUserData({ ...userData, errorFace: '' })
-    setLoading(true);
+    setLoadingSubmitFace(true);
     setShowCam(false);
 
     const imageSrc = webcamRef.current.getScreenshot();
@@ -298,7 +361,7 @@ function Profile() {
       setUserData({ ...userData, errorFace: error.message })
       setRetryButtonSubmitFace(true);
     }
-    setLoading(false)
+    setLoadingSubmitFace(false)
   }
 
   async function handleLoginFaceRemoveMFA(event) {
@@ -419,15 +482,15 @@ function Profile() {
       /></form></div>}
 
     {/* SUBMIT VOICE FOR MFA */}
-    {showVoice && 
+    {(showVoice || loadingSubmitVoice || userData.errorVoice) &&
       <div className="face">
           <div>
-            <div style={{
+            {!loadingSubmitVoice && showVoice &&<div style={{
                   display:"flex",
                   justifyContent:"center",
               }}>
               <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;đây là giọng nói của tôi&nbsp;&nbsp;</h2>
-            </div>
+            </div>}
             <div style={{
                 display:"flex",
                 justifyContent:"center",
@@ -455,24 +518,51 @@ function Profile() {
                   />
               </div>}
               <br/>
+              {userData.errorVoice && <p className="error">Error: {userData.errorVoice}</p>}
               <div style={{
                   display:"flex",
                   justifyContent:"center",
               }}>
-                {status==="recording" && <button onClick={stopRecording}>Stop Recording</button>}
-                {mediaBlobUrl && status!=="recording" && <button>Submit Voice</button>}{mediaBlobUrl &&status!=="recording" && <button onClick={startRecording}>Re-Record</button>}
+                {retryButtonSubmitVoice && <button onClick={handleRetrySubmitVoice}>Retry</button>}
+                {(!loadingSubmitVoice && showVoice && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
+                {(!loadingSubmitVoice && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleSubmitVoice}>Submit Voice</button> }
+                {(!loadingSubmitVoice && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleRetrySubmitVoice}>Re-record</button> }
               </div>
-            
+              {loadingSubmitVoice ? (<>
+                <div style={{
+                    display:"flex",
+                    justifyContent:"center",
+                }}>
+                Calculating voice attributes ...
+                </div>
+                
+                <>
+                <div style={{
+                    display:"flex",
+                    justifyContent:"center",
+                }}>
+                    
+                  <Image
+                    priority
+                    src="/images/loading.gif"
+                    className={utilStyles.borderCircle}
+                    height={100}
+                    width={100}
+                    />
+                </div>
+                </></>) : (<></>)
+              }
+              
           </div>
       </div>
     }
     {/* END SUBMIT VOICE FOR MFA */}
 
     {/* SUBMIT FACE FOR MFA */}
-    {(showCam || loading || userData.errorFace) &&
+    {(showCam || loadingSubmitFace || userData.errorFace) &&
     <div className="face">
      <form>
-     {!loading && showCam && <div style={{
+     {!loadingSubmitFace && showCam && <div style={{
                 display:"flex",
                 justifyContent:"center",
             }}>
@@ -484,7 +574,7 @@ function Profile() {
         screenshotFormat="image/jpeg"
       />}
       {showCam && <button type="submit" onClick={handleSubmitFace}>Submit Face</button>}
-      {loading ? (<>
+      {loadingSubmitFace ? (<>
         <div style={{
             display:"flex",
             justifyContent:"center",
@@ -508,7 +598,7 @@ function Profile() {
         </div>
         </></>) : (<></>)
       }
-      {loading && imgSrc && (
+      {loadingSubmitFace && imgSrc && (
             <img
               src={imgSrc}
             />
