@@ -8,21 +8,51 @@ import utilStyles from '../styles/utils.module.css'
 import Image from 'next/image'
 import Popup from 'reactjs-popup';
 import urlBase from '../constant/url'
+import { set } from 'js-cookie';
 
-import { useReactMediaRecorder } from "react-media-recorder";
+import dynamic from "next/dynamic";
+
+const ReactMic = dynamic(
+  () => {
+    return import('@cleandersonlobo/react-mic').then((mod) => mod.ReactMic);
+  },
+  { ssr: false }
+);
+
 
 function Profile() {
   const router = useRouter()
   const [data, setData] = useState(null);
   const webcamRef = useRef(null);
 
-  const {
-    status,
-    startRecording,
-    stopRecording,
-    mediaBlobUrl,
-    clearBlobUrl,
-  } = useReactMediaRecorder({ video: false });
+  const [mediaBlob, setMediaBlob] = useState(null);
+  const [mediaBlobUrl, setMediaBlobUrl] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [isRecord, setIsRecord] = useState(false);
+
+  function startRecording() {
+    setStatus("recording");
+    setIsRecord(true);
+  }
+ 
+  function stopRecording() {
+    setStatus(null);
+    setIsRecord(false);
+  }
+ 
+  function onData(recordedBlob) {
+    console.log('chunk of real-time data is: ', recordedBlob);
+  }
+ 
+  function onStop(recordedBlob) {
+    console.log('recordedBlob is: ', recordedBlob);
+    setMediaBlob(recordedBlob.blob)
+    setMediaBlobUrl(recordedBlob.blobURL);
+  }
+  function clearBlobUrl() {
+    setMediaBlob(null);
+    setMediaBlobUrl(null);
+  }
 
   const [loadingSubmitFace, setLoadingSubmitFace] = useState(false);
   const [loadingSubmitVoice, setLoadingSubmitVoice] = useState(false);
@@ -162,6 +192,7 @@ function Profile() {
     setShowVoice(!showVoice);
     stopRecording();
     clearBlobUrl();
+    setMediaBlob(null);
     setLoadingSubmitVoice(false);
     setRetryButtonSubmitVoice(false);
 
@@ -185,6 +216,7 @@ function Profile() {
     setShowVoice(false);
     stopRecording();
     clearBlobUrl();
+    setMediaBlob(null);
     setLoadingSubmitVoice(false);
     setRetryButtonSubmitVoice(false);
 
@@ -195,6 +227,7 @@ function Profile() {
     setShowVoice(true);
     stopRecording();
     clearBlobUrl();
+    setMediaBlob(null);
     setLoadingSubmitVoice(false);
     setRetryButtonSubmitVoice(false);
   }
@@ -279,39 +312,52 @@ function Profile() {
 
     const username = router.query.user
     const token = router.query.token
-    
-    let file = await fetch(mediaBlobUrl).then(r => r.blob());
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", mediaBlob);
     formData.append("request_id", uuidv4());
     formData.append("username", username);
-    formData.append("sound_rate", 44100)
+    // formData.append("sound_rate", 44100)
+
+    console.log(formData)
 
 
     try {
+      const response = await axios.post( 
+        urlBase + '/api/create/voice', formData, 
+        {
+          headers: {
+            'Content-Type': "multipart/form-data", 'Authorization': 'Bearer ' + token 
+          },
+          params: {
+            request_id: uuidv4(),
+            username: username,
+            sound_rate: 44100
+          }
+        }
+      );
 
-      const response = await fetch(urlBase + '/api/create/voice', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token},
-        body: formData,
-      })
+      // const response = await fetch(urlBase + '/api/create/voice', {
+      //   method: 'POST',
+      //   headers: {'Authorization': 'Bearer ' + token},
+      //   body: formData,
+      // })
 
-      if (response.status !== 200) {
-        throw new Error(await response.text())
-      } 
-      const r = await response.json()
-      const result_code = r.result_code
-      const result_message = r.result_message
-      const accepted = r.accepted
-      if (accepted) {
-        router.push('/mfa_success?op=add')
-      } else if (result_message === 'token invalid') {
-        router.push('/login_fail') }
-      else {
-        setUserData({ ...userData, errorVoice: result_message + " code " + result_code })
-        setRetryButtonSubmitVoice(true);
-      }
+      // if (response.status !== 200) {
+      //   throw new Error(await response.text())
+      // } 
+      // const r = await response.json()
+      // const result_code = r.result_code
+      // const result_message = r.result_message
+      // const accepted = r.accepted
+      // if (accepted) {
+      //   router.push('/mfa_success?op=add')
+      // } else if (result_message === 'token invalid') {
+      //   router.push('/login_fail') }
+      // else {
+      //   setUserData({ ...userData, errorVoice: result_message + " code " + result_code })
+      //   setRetryButtonSubmitVoice(true);
+      // }
     } catch (error) {
       console.error(error)
       setUserData({ ...userData, errorVoice: error.message })
@@ -484,6 +530,18 @@ function Profile() {
     {/* SUBMIT VOICE FOR MFA */}
     {(showVoice || loadingSubmitVoice || userData.errorVoice) &&
       <div className="face">
+          {showVoice && !loadingSubmitVoice && 
+          <div style={{visibility: 'hidden', height: 1, width:    1 }}>
+            <ReactMic
+              record={isRecord}
+              className=""
+              onStop={onStop}
+              onData={onData}
+              strokeColor="#000000"
+              mimeType="audio/wav"
+            />
+          </div>
+          }
           <div>
             {!loadingSubmitVoice && showVoice &&<div style={{
                   display:"flex",
