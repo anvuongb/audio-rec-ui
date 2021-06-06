@@ -73,9 +73,14 @@ function Profile() {
   const [retryButtonSubmitVoice, setRetryButtonSubmitVoice] = useState(false);
 
   const [showMFA, setShowMFA] = useState(false);
+
   const [faceMFAData, setFaceMFAData] = useState(null);
   const [showFacePopup, setShowFacePopup] = useState(false);
   const [showFacePopupData, setShowFacePopupData] = useState(null);
+
+  const [voiceMFAData, setVoiceMFAData] = useState(null);
+  const [showVoicePopup, setShowVoicePopup] = useState(false);
+  const [showVoicePopupData, setShowVoicePopupData] = useState(null);
 
   const username = router.query.user;
   const token = router.query.token;
@@ -255,7 +260,7 @@ function Profile() {
     setUserData({ ...userData, errorMfaRecord: "" })
   }
 
-  function handleRetryRemoveFaceMF() {
+  function handleRetryRemoveFaceMFA() {
     setLoadingRemoveMFA(false);
     setShowCamRemoveFaceMFA(true);
     setRetryButtonLoginFace(false);
@@ -265,7 +270,7 @@ function Profile() {
   async function handleViewFaceMFA(event) {
     event.preventDefault()
     setShowMFA(!showMFA)
-    setShowCam(false);
+    setShowVoice(false);
     setLoadingMFA(true);
     setFaceMFAData(null);
     setRetryButtonSubmitFace(false);
@@ -283,7 +288,7 @@ function Profile() {
 
     try {
       const response = await axios.get(
-        urlBase + '/api/history/mfa/records',
+        urlBase + '/api/history/mfa/record/face',
         {
           headers: {
             'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
@@ -299,7 +304,47 @@ function Profile() {
     } catch (error) {
       console.error(error)
       setUserData({ ...userData, errorMfaRecord: error.message })
-      setRetryButtonSubmitFace(true);
+    }
+    setLoadingMFA(false);
+  }
+
+  async function handleViewVoiceMFA(event) {
+    event.preventDefault()
+    setShowMFA(!showMFA)
+    setShowCam(false);
+    setLoadingMFA(true);
+    setVoiceMFAData(null);
+    setRetryButtonSubmitVoice(false);
+    setUserData({ ...userData, errorMfaRecord: "" })
+
+    // clear remove MFA
+    setUserData({ ...userData, errorFaceLogin: '' });
+    setShowCamRemoveFaceMFA(false);
+    setLoadingRemoveMFA(false);
+    setImgSrc(null);
+    setRetryButtonLoginFace(false);
+
+    const username = router.query.user
+    const token = router.query.token
+
+    try {
+      const response = await axios.get(
+        urlBase + '/api/history/mfa/record/voice',
+        {
+          headers: {
+            'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
+          },
+          params: {
+            request_id: uuidv4(),
+            username: username
+          }
+        }
+      );
+
+      setVoiceMFAData(response.data)
+    } catch (error) {
+      console.error(error)
+      setUserData({ ...userData, errorMfaRecord: error.message })
     }
     setLoadingMFA(false);
   }
@@ -493,9 +538,15 @@ function Profile() {
                 justifyContent:"center",
             }}>
       {mfaMethod === 1 ? (<><button type="submit" onClick={handleEnableFaceMfa}>Enable Face MFA</button> <button type="submit" onClick={handleEnableVoiceMfa}>Enable Voice MFA</button></>):
-      (<><button type="submit" onClick={handleViewFaceMFA}>View your MFA records</button>
-       <button type="submit" onClick={handleRemoveFaceMFA}>Remove your MFA records</button></>
-      ) }
+      (<></>) }
+      {mfaMethod === 2 ? (<><button type="submit" onClick={handleViewFaceMFA}>View your face-based  MFA records</button>
+       <button type="submit" onClick={handleRemoveFaceMFA}>Remove your face-based MFA records</button></>):
+      (<></>) }
+      {mfaMethod === 3 ? (<><button type="submit" onClick={handleViewVoiceMFA}>View your voice-based MFA records</button>
+       <button type="submit" onClick={handleRemoveFaceMFA}>Remove your voice-based MFA records</button></>):
+      (<></>) }
+      
+      
     </div>
     {(!faceMFAData && showMFA && loadingMFA) && 
       <div style={{
@@ -520,7 +571,13 @@ function Profile() {
         <img 
         src={`data:image/jpeg;base64,${faceMFAData.image}`}
       /></form></div>}
-
+    {(voiceMFAData && showMFA) && 
+      <div className="face">
+      <form>
+      <small>Date added:</small> {voiceMFAData.added_date}
+      <audio 
+        src={`data:audio/wav;base64,${voiceMFAData.voice}`} controls
+      /></form></div>}
     {/* SUBMIT VOICE FOR MFA */}
     {(showVoice || loadingSubmitVoice || userData.errorVoice) &&
       <div className="face">
@@ -710,7 +767,7 @@ function Profile() {
           )}
       {userData.errorFaceLogin && <p className="error">Error: {userData.errorFaceLogin}</p>}
       { retryButtonLoginFace && 
-            <button type="submit" onClick={handleRetryRemoveFaceMF}>Retry</button>
+            <button type="submit" onClick={handleRetryRemoveFaceMFA}>Retry</button>
           }
     </form>
     </div>}
