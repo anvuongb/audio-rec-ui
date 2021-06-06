@@ -1,3 +1,3 @@
-const urlBase = "http://localhost:8580"
+const urlBase = ""
 
 export default urlBase

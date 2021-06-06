@@ -30,6 +30,39 @@ function Profile() {
   const [status, setStatus] = useState(null);
   const [isRecord, setIsRecord] = useState(false);
 
+  const [voiceToken, setVoiceToken] = useState("");
+  const [voiceGeneratedText, setVoiceGeneratedText] = useState("");
+
+  async function getVoiceToken() {
+    const username = router.query.user
+    const token = router.query.token
+    try {
+        const response = await fetch(urlBase + '/api/voice/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
+          body: JSON.stringify({"request_id":uuidv4(), "user_name":username}),
+        })
+  
+        if (response.status !== 200) {
+          throw new Error(await response.text())
+        }
+        const r = await response.json()
+        const result_code = r.result_code
+        const result_message = r.result_message
+        const voice_token = r.token
+        const voice_generated_text = r.voice_generated_text
+        if (result_code === 1) {
+            setVoiceToken(voice_token);
+            setVoiceGeneratedText(voice_generated_text)
+        } else {
+          setUserData({ ...userData, error: result_message + " code " + result_code })
+        }
+      } catch (error) {
+        console.error(error)
+        setUserData({ ...userData, error: error.message })
+      }
+  }
+
   function startRecording() {
     setStatus("recording");
     setIsRecord(true);
@@ -57,20 +90,25 @@ function Profile() {
   const [loadingSubmitFace, setLoadingSubmitFace] = useState(false);
   const [loadingSubmitVoice, setLoadingSubmitVoice] = useState(false);
   const [loadingMFA, setLoadingMFA] = useState(false);
-  const [loadingRemoveMFA, setLoadingRemoveMFA] = useState(false);
+  const [loadingRemoveFaceMFA, setLoadingRemoveFaceMFA] = useState(false);
+  const [loadingRemoveVoiceMFA, setLoadingRemoveVoiceMFA] = useState(false);
+  
   const [loadingPopupFace, setLoadingPopupFace] = useState(false);
+  const [loadingPopupVoice, setLoadingPopupVoice] = useState(false);
 
   const [dataFilter, setDataFilter] = useState(null);
   const [mfaMethod, setMfaMethod] = useState(null);
   const [showCam, setShowCam] = useState(false);
   const [showVoice, setShowVoice] = useState(false);
   const [showCamRemoveFaceMFA, setShowCamRemoveFaceMFA] = useState(false);
+  const [showVoiceRemoveVoiceMFA, setShowVoiceRemoveVoiceMFA] = useState(false);
   const [imgSrc, setImgSrc] = useState(null);
 
   const [retryButtonSubmitFace, setRetryButtonSubmitFace] = useState(false);
   const [retryButtonLoginFace, setRetryButtonLoginFace] = useState(false);
 
   const [retryButtonSubmitVoice, setRetryButtonSubmitVoice] = useState(false);
+  const [retryButtonLoginVoice, setRetryButtonLoginVoice] = useState(false);
 
   const [showMFA, setShowMFA] = useState(false);
 
@@ -90,8 +128,11 @@ function Profile() {
     errorMfa: '',
     errorFace: '',
     errorFaceLogin: '',
+    errorVoice: '',
+    errorVoiceLogin: '',
     errorMfaRecord: '',
     errorFacePopup: '',
+    errorVoicePopup: '',
   })
   const fetchData = async() => {
     try {
@@ -161,6 +202,12 @@ function Profile() {
     setLoadingPopupFace(false);
   }
 
+  const closeVoicePopup = () => {
+    setShowVoicePopup(false);
+    setShowVoicePopupData(null);
+    setLoadingPopupVoice(false);
+  }
+
   async function handleShowFacePopup(faceId) {
     setShowFacePopup(true);
     setLoadingPopupFace(true);
@@ -187,6 +234,36 @@ function Profile() {
     } catch (error) {
       console.error(error)
       setUserData({ ...userData, errorFacePopup: error.message })
+    }
+    setLoadingPopupFace(false);
+  }
+
+  async function handleShowVoicePopup(voiceId) {
+    setShowVoicePopup(true);
+    setLoadingPopupFace(true);
+
+    const username = router.query.user
+    const token = router.query.token
+
+    try {
+      const response = await axios.get(
+        urlBase + '/api/history/voice/voice',
+        {
+          headers: {
+            'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token 
+          },
+          params: {
+            request_id: uuidv4(),
+            voice_id: voiceId,
+            username: username,
+          }
+        }
+      );
+
+      setShowVoicePopupData(response.data)
+    } catch (error) {
+      console.error(error)
+      setUserData({ ...userData, errorVoicePopup: error.message })
     }
     setLoadingPopupFace(false);
   }
@@ -249,7 +326,7 @@ function Profile() {
     event.preventDefault()
     setUserData({ ...userData, errorFaceLogin: '' });
     setShowCamRemoveFaceMFA(!showCamRemoveFaceMFA);
-    setLoadingRemoveMFA(false);
+    setLoadingRemoveFaceMFA(false);
     setImgSrc(null);
     setRetryButtonLoginFace(false);
 
@@ -261,7 +338,7 @@ function Profile() {
   }
 
   function handleRetryRemoveFaceMFA() {
-    setLoadingRemoveMFA(false);
+    setLoadingRemoveFaceMFA(false);
     setShowCamRemoveFaceMFA(true);
     setRetryButtonLoginFace(false);
     setUserData({ ...userData, errorFaceLogin: "" })
@@ -279,7 +356,7 @@ function Profile() {
     // clear remove MFA
     setUserData({ ...userData, errorFaceLogin: '' });
     setShowCamRemoveFaceMFA(false);
-    setLoadingRemoveMFA(false);
+    setLoadingRemoveFaceMFA(false);
     setImgSrc(null);
     setRetryButtonLoginFace(false);
 
@@ -308,6 +385,42 @@ function Profile() {
     setLoadingMFA(false);
   }
 
+  async function handleRemoveVoiceMFA(event) {
+    event.preventDefault()
+    setUserData({ ...userData, errorVoiceLogin: '' });
+    if (showVoiceRemoveVoiceMFA) {
+      setVoiceToken("");
+    }
+    setShowVoiceRemoveVoiceMFA(!showVoiceRemoveVoiceMFA);
+    setLoadingRemoveVoiceMFA(false);
+    stopRecording();
+    clearBlobUrl();
+    setRetryButtonLoginVoice(false);
+
+    // clear view MFA
+    setShowMFA(false);
+    setLoadingMFA(false);
+    setVoiceMFAData(null);
+    setUserData({ ...userData, errorMfaRecord: "" })
+
+    // get token 
+    getVoiceToken();
+  }
+
+  function handleRetryRemoveVoiceMFA() {
+    //clear state
+    setUserData({ ...userData, errorVoiceLogin: '' });
+    setVoiceToken("")
+    setShowVoiceRemoveVoiceMFA(true);
+    setLoadingRemoveVoiceMFA(false);
+    stopRecording();
+    clearBlobUrl();
+    setRetryButtonLoginVoice(false);
+
+    // get voice token
+    getVoiceToken();
+  }
+
   async function handleViewVoiceMFA(event) {
     event.preventDefault()
     setShowMFA(!showMFA)
@@ -318,11 +431,12 @@ function Profile() {
     setUserData({ ...userData, errorMfaRecord: "" })
 
     // clear remove MFA
-    setUserData({ ...userData, errorFaceLogin: '' });
-    setShowCamRemoveFaceMFA(false);
-    setLoadingRemoveMFA(false);
-    setImgSrc(null);
-    setRetryButtonLoginFace(false);
+    setUserData({ ...userData, errorVoiceLogin: '' });
+    setShowVoiceRemoveVoiceMFA(false);
+    setLoadingRemoveVoiceMFA(false);
+    stopRecording();
+    clearBlobUrl();
+    setRetryButtonLoginVoice(false);
 
     const username = router.query.user
     const token = router.query.token
@@ -452,7 +566,7 @@ function Profile() {
   async function handleLoginFaceRemoveMFA(event) {
     event.preventDefault()
     setUserData({ ...userData, errorFaceLogin: '' })
-    setLoadingRemoveMFA(true);
+    setLoadingRemoveFaceMFA(true);
     setShowCamRemoveFaceMFA(false);
 
     const imageSrc = webcamRef.current.getScreenshot();
@@ -518,7 +632,88 @@ function Profile() {
       setUserData({ ...userData, errorFaceLogin: error.message })
       setRetryButtonLoginFace(true);
     }
-    setLoadingRemoveMFA(false)
+    setLoadingRemoveFaceMFA(false)
+  }
+
+  async function handleLoginVoiceRemoveMFA(event) {
+    event.preventDefault()
+    setUserData({ ...userData, errorVoiceLogin: '' })
+    setLoadingRemoveVoiceMFA(true);
+    setShowVoiceRemoveVoiceMFA(false);
+
+    const username = router.query.user
+    const token = router.query.token
+
+    const formData = new FormData();
+    formData.append("file", mediaBlob);
+    formData.append("request_id", uuidv4());
+    formData.append("username", username);
+    formData.append("voice_generated_text", voiceGeneratedText)
+
+    try {
+      const response = await axios.post( 
+        urlBase + '/api/login/voice', formData, 
+        {
+          headers: {
+            'Content-Type': "multipart/form-data", 'Authorization': 'Bearer ' + token , 'Authorization-Voice': 'Bearer ' + voiceToken,
+          },
+          params: {
+            request_id: uuidv4(),
+            username: username,
+            sound_rate: 44100
+          }
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error(response.statusText)
+      } 
+      const r = response.data
+      const result_code = r.result_code
+      const result_message = r.result_message
+      const next_step = r.next_step
+      const newToken = r.token
+      if (result_code === 1 && next_step === "done") {
+        try {
+          const responseRemove = await axios.get(
+            urlBase + '/api/mfa/remove/voice',
+            {
+              headers: {
+                'Content-Type': 'application/json', 'Authorization': 'Bearer ' + newToken 
+              },
+              params: {
+                request_id: uuidv4(),
+                username: username
+              }
+            }
+          );
+          const result_code_r = responseRemove.data.result_code
+          const result_message_r = responseRemove.data.result_message
+          if (result_code_r === 1) {
+            router.push('/mfa_success?op=remove')
+          }
+          else {
+            setUserData({ ...userData, errorVoiceLogin: result_message_r + " code " + result_code_r })
+            setRetryButtonLoginVoice(true);
+          }
+        }
+        catch(error) {
+          console.error(error)
+          setUserData({ ...userData, errorVoiceLogin: error.message })
+          setRetryButtonLoginVoice(true);
+        }
+      } else if (result_message === 'token invalid') {
+        router.push('/login_fail')
+      } else {
+        setUserData({ ...userData, errorVoiceLogin: result_message + " code " + result_code })
+        setRetryButtonLoginVoice(true);
+      }
+    } catch (error) {
+      console.error(error)
+      setUserData({ ...userData, errorVoiceLogin: error.message })
+      setRetryButtonLoginVoice(true);
+    }
+    setLoadingRemoveVoiceMFA(false)
   }
 
   return (
@@ -543,7 +738,7 @@ function Profile() {
        <button type="submit" onClick={handleRemoveFaceMFA}>Remove your face-based MFA records</button></>):
       (<></>) }
       {mfaMethod === 3 ? (<><button type="submit" onClick={handleViewVoiceMFA}>View your voice-based MFA records</button>
-       <button type="submit" onClick={handleRemoveFaceMFA}>Remove your voice-based MFA records</button></>):
+       <button type="submit" onClick={handleRemoveVoiceMFA}>Remove your voice-based MFA records</button></>):
       (<></>) }
       
       
@@ -578,6 +773,7 @@ function Profile() {
       <audio 
         src={`data:audio/wav;base64,${voiceMFAData.voice}`} controls
       /></form></div>}
+
     {/* SUBMIT VOICE FOR MFA */}
     {(showVoice || loadingSubmitVoice || userData.errorVoice) &&
       <div className="face">
@@ -594,6 +790,12 @@ function Profile() {
           </div>
           }
           <div>
+            {!loadingSubmitVoice && showVoice && <div style={{
+                display:"flex",
+                justifyContent:"center",
+            }}>
+            <b>{router.query.user}</b>, record the following text to create voice-based MFA
+            </div>}
             {!loadingSubmitVoice && showVoice &&<div style={{
                   display:"flex",
                   justifyContent:"center",
@@ -667,6 +869,121 @@ function Profile() {
     }
     {/* END SUBMIT VOICE FOR MFA */}
 
+    {/* SUBMIT VOICE FOR REMOVE MFA */}
+    {(showVoiceRemoveVoiceMFA || loadingRemoveVoiceMFA || userData.errorVoiceLogin) &&
+    <div className="face">
+     <form>
+      {!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && <div style={{
+                display:"flex",
+                justifyContent:"center",
+            }}>
+            <b>{router.query.user}</b>, verify your voice to remove MFA
+            </div>}
+      {!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && <div style={{visibility: 'hidden', height: 1, width:    1 }}>
+            <ReactMic
+              record={isRecord}
+              className=""
+              onStop={onStop}
+              onData={onData}
+              strokeColor="#000000"
+              mimeType="audio/wav"
+            />
+          </div>}
+      <div>
+      {!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA &&<div style={{
+            display:"flex",
+            justifyContent:"center",
+        }}>
+        <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;{voiceGeneratedText}&nbsp;&nbsp;</h2>
+      </div>}
+      {!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && !mediaBlob && status !== "recording" &&
+      
+        (<><div style={{
+            display:"flex",
+            justifyContent:"center",
+        }}>
+            
+          <Image
+            className="refresh"
+            onClick={getVoiceToken}
+            onHo
+            priority
+            src="/images/refresh.png"
+            className={utilStyles.borderCircle}
+            height={30}
+            width={30}
+            />
+        </div><br/></>)
+        
+      }
+      
+      <div style={{
+          display:"flex",
+          justifyContent:"center",
+      }}>
+        {status!=="recording" && !mediaBlobUrl && <button onClick={startRecording}>Start Recording</button>}
+      </div>
+      <div style={{
+            display:"flex",
+            justifyContent:"center",
+        }}>
+        {mediaBlobUrl && !loadingRemoveVoiceMFA && status!=="recording" && <audio src={mediaBlobUrl} controls/>}
+      </div>
+      {status==="recording" && 
+        <div style={{
+            display:"flex",
+            justifyContent:"center",
+        }}>
+            
+          <Image
+            priority
+            src="/images/recording.gif"
+            className={utilStyles.borderCircle}
+            height={37}
+            width={49}
+            />
+        </div>}
+        <br/>
+        {userData.errorVoiceLogin && <p className="error">Error: {userData.errorVoiceLogin}</p>}
+        <div style={{
+            display:"flex",
+            justifyContent:"center",
+        }}>
+          {retryButtonLoginVoice && <button onClick={handleRetryRemoveVoiceMFA}>Retry</button>}
+          {(!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
+          {(!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && mediaBlobUrl && status!=="recording") && <button onClick={handleLoginVoiceRemoveMFA}>Submit Voice</button> }
+          {(!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && mediaBlobUrl && status!=="recording") && <button onClick={handleRetryRemoveVoiceMFA}>Re-record</button> }
+        </div>
+        {loadingRemoveVoiceMFA ? (<>
+          <div style={{
+              display:"flex",
+              justifyContent:"center",
+          }}>
+          Calculating voice attributes ...
+          </div>
+          
+          <>
+          <div style={{
+              display:"flex",
+              justifyContent:"center",
+          }}>
+              
+            <Image
+              priority
+              src="/images/loading.gif"
+              className={utilStyles.borderCircle}
+              height={100}
+              width={100}
+              />
+          </div>
+          </></>) : (<></>)
+        }
+        
+    </div>
+    </form>
+    </div>}
+    {/* END SUBMIT VOICE FOR REMOVE MFA */}
+
     {/* SUBMIT FACE FOR MFA */}
     {(showCam || loadingSubmitFace || userData.errorFace) &&
     <div className="face">
@@ -675,7 +992,7 @@ function Profile() {
                 display:"flex",
                 justifyContent:"center",
             }}>
-            <b>{router.query.user}</b>, take a photo to create MFA
+            <b>{router.query.user}</b>, take a photo to create face-based MFA
             </div>}
       {showCam && <Webcam
         audio={false}
@@ -721,10 +1038,10 @@ function Profile() {
     {/* END SUBMIT FACE FOR MFA */}
 
     {/* SUBMIT FACE FOR REMOVE MFA */}
-    {(showCamRemoveFaceMFA || loadingRemoveMFA || userData.errorFaceLogin) &&
+    {(showCamRemoveFaceMFA || loadingRemoveFaceMFA || userData.errorFaceLogin) &&
     <div className="face">
      <form>
-     {!loadingRemoveMFA && showCamRemoveFaceMFA && <div style={{
+     {!loadingRemoveFaceMFA && showCamRemoveFaceMFA && <div style={{
                 display:"flex",
                 justifyContent:"center",
             }}>
@@ -736,7 +1053,7 @@ function Profile() {
         screenshotFormat="image/jpeg"
       />}
       {showCamRemoveFaceMFA && <button type="submit" onClick={handleLoginFaceRemoveMFA}>Submit Face</button>}
-      {loadingRemoveMFA ? (<>
+      {loadingRemoveFaceMFA ? (<>
         <div style={{
             display:"flex",
             justifyContent:"center",
@@ -760,7 +1077,7 @@ function Profile() {
         </div>
         </></>) : (<></>)
       }
-      {loadingRemoveMFA && imgSrc && (
+      {loadingRemoveFaceMFA && imgSrc && (
             <img
               src={imgSrc}
             />
@@ -801,7 +1118,14 @@ function Profile() {
         {dataFilter.map((item) => (
           <tr key={item.login_at}>
             {Object.entries(item).map((v) => (
-              <td>{v[0] === "face_id" ? (<>{<a onClick={() => {handleShowFacePopup(v[1])}}>{v[1]}</a>}</>) : (<>{v[1]==="ok" && <Image
+              <td>{v[0] === "face_id" || v[0] === "voice_id" ? 
+                (v[0] === "face_id" ? 
+                  (<>{<a onClick={() => {handleShowFacePopup(v[1])}}>{v[1]}</a>}</>)
+                  :
+                  (<>{<a onClick={() => {handleShowVoicePopup(v[1])}}>{v[1]}</a>}</>)
+                ) 
+                : 
+                (<>{v[1]==="ok" && <Image
                   priority
                   src="/images/green-tick.png"
                   className={utilStyles.borderCircle}
@@ -816,6 +1140,48 @@ function Profile() {
         {userData.error && <p className="error">Error: {userData.error}</p>}
       </div>
 
+      {/* DISPLAY VOICE POPUP */}
+      {showVoicePopup && 
+      <>
+      <div>
+        <Popup open={showVoicePopup} closeOnDocumentClick onClose={closeVoicePopup} position="center">
+        <div className="popup-content">
+          <a className="close" onClick={closeVoicePopup}>
+            &times;
+          </a>
+          
+          {showVoicePopupData && <div><audio src={`data:audio/wav;base64,${showVoicePopupData.voice}`} controls/></div>}
+
+          {loadingSubmitVoice && <div>
+            <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+              Fetching data ...
+            </div>
+            <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+                <Image
+                  priority
+                  src="/images/loading.gif"
+                  className={utilStyles.borderCircle}
+                  height={100}
+                  width={100}
+                  />
+            </div>
+            </div>
+            }
+          {userData.errorVoicePopup && <p className="error">Error: {userData.errorVoicePopup}</p>}
+
+        </div>
+        </Popup>
+        </div>
+        </>}
+      {/* END DISPLAY VOICE POPUP */}
+
+      {/* DISPLAY FACE POPUP */}
       {showFacePopup && 
       <>
       <div>
@@ -848,11 +1214,14 @@ function Profile() {
             </div>
             </div>
             }
+            {userData.errorFacePopup && <p className="error">Error: {userData.errorFacePopup}</p>}
 
         </div>
         </Popup>
         </div>
         </>}
+      {/* END DISPLAY FACE POPUP */}
+
       {/* END DISPLAY LOGIN RECORDS */}
       <style jsx>{`
         .popup-content {
