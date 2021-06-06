@@ -103,7 +103,7 @@ function Profile() {
         }
       );
         const dataF = response.data.map((d) => Object.assign({}, ...
-            Object.entries(d).filter(([k,v]) => k==='login_method' || k==='result_message' || k==='login_at' ||k==='face_id').map(([k,v]) => ({[k]:v}))
+            Object.entries(d).filter(([k,v]) => k==='login_method' || k==='result_message' || k==='login_at' ||k==='face_id'||k==='voice_id').map(([k,v]) => ({[k]:v}))
         ))
         setData(response.data)
         setDataFilter(dataF)
@@ -337,27 +337,21 @@ function Profile() {
         }
       );
 
-      // const response = await fetch(urlBase + '/api/create/voice', {
-      //   method: 'POST',
-      //   headers: {'Authorization': 'Bearer ' + token},
-      //   body: formData,
-      // })
-
-      // if (response.status !== 200) {
-      //   throw new Error(await response.text())
-      // } 
-      // const r = await response.json()
-      // const result_code = r.result_code
-      // const result_message = r.result_message
-      // const accepted = r.accepted
-      // if (accepted) {
-      //   router.push('/mfa_success?op=add')
-      // } else if (result_message === 'token invalid') {
-      //   router.push('/login_fail') }
-      // else {
-      //   setUserData({ ...userData, errorVoice: result_message + " code " + result_code })
-      //   setRetryButtonSubmitVoice(true);
-      // }
+      if (response.status !== 200) {
+        throw new Error(response.statusText)
+      } 
+      const r = response.data
+      const result_code = r.result_code
+      const result_message = r.result_message
+      const accepted = r.accepted
+      if (accepted) {
+        router.push('/mfa_success?op=add')
+      } else if (result_message === 'token invalid') {
+        router.push('/login_fail') }
+      else {
+        setUserData({ ...userData, errorVoice: result_message + " code " + result_code })
+        setRetryButtonSubmitVoice(true);
+      }
     } catch (error) {
       console.error(error)
       setUserData({ ...userData, errorVoice: error.message })
@@ -559,7 +553,7 @@ function Profile() {
                   display:"flex",
                   justifyContent:"center",
               }}>
-              {mediaBlobUrl && status!=="recording" && <audio src={mediaBlobUrl} controls/>}
+              {mediaBlobUrl && !loadingSubmitVoice && status!=="recording" && <audio src={mediaBlobUrl} controls/>}
             </div>
             {status==="recording" && 
               <div style={{

@@ -7,28 +7,29 @@ import utilStyles from '../styles/utils.module.css'
 
 function LoginSuccess() {
   const r = useRouter()
+
   if (r.query.next_step === "done") {
     useEffect(() => {
       setTimeout(
           () => {r.push('/profile?user='+r.query.user+'&token='+r.query.token)},
           3000,
       )
-    });
+    }, []);
   } else if (r.query.next_step === "biometrics_face"){
     useEffect(() => {
       setTimeout(
           () => {r.push('/login_face?user='+r.query.user+'&token='+r.query.token)},
           3000,
       )
-    });
+    }, []);
   }
   else if (r.query.next_step === "biometrics_voice"){
     useEffect(() => {
       setTimeout(
-          () => {r.push('/login_voice'+r.query.user+'&token='+r.query.token)},
+          () => {r.push('/login_voice?user='+r.query.user+'&token='+r.query.token)},
           3000,
       )
-    });
+    }, []);
   }
 
   return (
@@ -37,7 +38,7 @@ function LoginSuccess() {
         display:"flex",
         justifyContent:"center",
     }}>
-    {r.query.next_step==="done" ? <>Login success, redirecting to dashboard page</> : <>Your account has MFA enabled, directing you to next step</>}
+    {r.query.next_step==="done" ? <>Login success, redirecting to dashboard page</> : <>Your account has {r.query.next_step==="biometrics_voice" ? (<>voice-based</>):(<></>)}{r.query.next_step==="biometrics_face" ? (<>face-based</>):(<></>)} MFA enabled, directing you to next step</>}
     </div>
     <>
     <div style={{

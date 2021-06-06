@@ -38,6 +38,8 @@ function Login() {
         Router.push('/login_success?next_step=done&user='+username+'&token='+token)
       } else if (result_code === 1 && next_step === "biometrics_face") {
         Router.push('/login_success?next_step=biometrics_face&user='+username+'&token='+token)
+      } else if (result_code === 1 && next_step === "biometrics_voice") {
+        Router.push('/login_success?next_step=biometrics_voice&user='+username+'&token='+token)
       } else {
         setUserData({ ...userData, error: result_message + " code " + result_code })
       }
