@@ -1254,7 +1254,7 @@ function Profile() {
           justifyContent: center;
         }
         .face {
-          max-width: 500px;
+          max-width: 550px;
           margin: 0 auto;
           padding: 1rem;
           border: 1px solid #ccc;
