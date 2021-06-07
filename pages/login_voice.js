@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid';
 import urlBase from '../constant/url'
 import axios from 'axios'
+import Head from 'next/head'
 
 
 import dynamic from "next/dynamic";
@@ -167,6 +168,9 @@ function Login() {
 
   return (
     <Layout login>
+      <Head>
+        <title>Voice Login page</title>
+      </Head>
       <div className="login">
         <form>
         {showVoice && !loading && 

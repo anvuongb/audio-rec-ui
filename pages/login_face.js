@@ -6,6 +6,7 @@ import utilStyles from '../styles/utils.module.css'
 import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid';
 import urlBase from '../constant/url'
+import Head from 'next/head'
 
 
 function Login() {
@@ -75,6 +76,9 @@ function Login() {
 
   return (
     <Layout login>
+      <Head>
+        <title>Face Login page</title>
+      </Head>
       <div className="login">
         <form>
           {!loading && showCam && <div style={{

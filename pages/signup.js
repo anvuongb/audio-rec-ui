@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Router from 'next/router'
 import Layout from '../components/layout'
 import urlBase from '../constant/url'
+import Head from 'next/head'
 
 function Signup() {
   const [userData, setUserData] = useState({
@@ -63,6 +64,9 @@ function Signup() {
 
   return (
     <Layout signup>
+      <Head>
+        <title>Signup page</title>
+      </Head>
       <div className="signup">
         <form onSubmit={handleSubmit}>
           <label htmlFor="username">Username</label>

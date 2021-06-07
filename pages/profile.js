@@ -11,6 +11,7 @@ import urlBase from '../constant/url'
 import { set } from 'js-cookie';
 
 import dynamic from "next/dynamic";
+import Head from 'next/head'
 
 const ReactMic = dynamic(
   () => {
@@ -718,6 +719,9 @@ function Profile() {
 
   return (
     <Layout profile>
+      <Head>
+        <title>User profile page</title>
+      </Head>
     <div style={{
                 display:"flex",
                 justifyContent:"center",

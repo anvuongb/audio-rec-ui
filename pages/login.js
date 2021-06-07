@@ -3,6 +3,7 @@ import Router from 'next/router'
 import Layout from '../components/layout'
 import { v4 as uuidv4 } from 'uuid';
 import urlBase from '../constant/url'
+import Head from 'next/head'
 
 
 function Login() {
@@ -51,6 +52,9 @@ function Login() {
 
   return (
     <Layout login>
+    <Head>
+        <title>Login page</title>
+      </Head>
       <div className="login">
         <form onSubmit={handleSubmit}>
           <label htmlFor="username">Username</label>
