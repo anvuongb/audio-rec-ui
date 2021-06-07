@@ -23,6 +23,30 @@ const ReactMic = dynamic(
 
 function Profile() {
   const router = useRouter()
+  const [userData, setUserData] = useState({
+    error: '',
+    errorMfa: '',
+    errorFace: '',
+    errorFaceLogin: '',
+    errorVoice: '',
+    errorVoiceLogin: '',
+    errorMfaRecord: '',
+    errorFacePopup: '',
+    errorVoicePopup: '',
+  })
+  const [errorFace, setErrorFace] = useState("");
+  const [errorVoice, setErrorVoice] = useState("");
+
+  const [errorFaceLogin, setErrorFaceLogin] = useState("");
+  const [errorVoiceLogin, setErrorVoiceLogin] = useState("");
+
+  const [errorFacePopup, setErrorFacePopup] = useState("");
+  const [errorVoicePopup, setErrorVoicePopup] = useState("");
+
+  const [error, setError] = useState("");
+  const [errorMfa, setErrorMfa] = useState("");
+  const [errorMfaRecord, setErrorMfaRecord] = useState("");
+
   const [data, setData] = useState(null);
   const webcamRef = useRef(null);
 
@@ -56,11 +80,11 @@ function Profile() {
             setVoiceToken(voice_token);
             setVoiceGeneratedText(voice_generated_text)
         } else {
-          setUserData({ ...userData, error: result_message + " code " + result_code })
+          setError(result_message + " code " + result_code )
         }
       } catch (error) {
         console.error(error)
-        setUserData({ ...userData, error: error.message })
+        setError(error.message)
       }
   }
 
@@ -124,17 +148,6 @@ function Profile() {
   const username = router.query.user;
   const token = router.query.token;
 
-  const [userData, setUserData] = useState({
-    error: '',
-    errorMfa: '',
-    errorFace: '',
-    errorFaceLogin: '',
-    errorVoice: '',
-    errorVoiceLogin: '',
-    errorMfaRecord: '',
-    errorFacePopup: '',
-    errorVoicePopup: '',
-  })
   const fetchData = async() => {
     try {
       const response = await axios.get(
@@ -158,7 +171,7 @@ function Profile() {
     catch (error) {
       console.error(error)
       setData(null);
-      setUserData({ ...userData, errorMfa: error.message });
+      setErrorMfa(error.message );
       router.push('/login_fail');
     }
   }
@@ -183,7 +196,7 @@ function Profile() {
     catch (error) {
       console.error(error)
       setMfaMethod(null);
-      setUserData({ ...userData, error: error.message });
+      SetError(error.message);
       router.push('/login_fail');
     }
   }
@@ -234,7 +247,7 @@ function Profile() {
       setShowFacePopupData(response.data)
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorFacePopup: error.message })
+      setErrorFacePopup(error.message)
     }
     setLoadingPopupFace(false);
   }
@@ -264,14 +277,14 @@ function Profile() {
       setShowVoicePopupData(response.data)
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorVoicePopup: error.message })
+      setErrorVoicePopup(error.message)
     }
     setLoadingPopupFace(false);
   }
 
   function handleEnableVoiceMfa(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorVoice: '' })
+    setErrorVoice("")
     setShowVoice(!showVoice);
     stopRecording();
     clearBlobUrl();
@@ -280,7 +293,7 @@ function Profile() {
     setRetryButtonSubmitVoice(false);
 
     // disable face mfa
-    setUserData({ ...userData, errorFace: '' })
+    setErrorFace("")
     setShowCam(false);
     setLoadingSubmitFace(false);
     setImgSrc(null);
@@ -288,14 +301,14 @@ function Profile() {
   } 
 
   function handleEnableFaceMfa(event) {
-    setUserData({ ...userData, errorFace: '' });
+    setErrorFace("");
     setShowCam(!showCam);
     setLoadingSubmitFace(false);
     setImgSrc(null);
     setRetryButtonSubmitFace(false);
 
     // disable voice mfa
-    setUserData({ ...userData, errorVoice: '' })
+    setErrorVoice("")
     setShowVoice(false);
     stopRecording();
     clearBlobUrl();
@@ -306,7 +319,7 @@ function Profile() {
   }
 
   function handleRetrySubmitVoice() {
-    setUserData({ ...userData, errorVoice: '' })
+    setErrorVoice("")
     setShowVoice(true);
     stopRecording();
     clearBlobUrl();
@@ -319,13 +332,13 @@ function Profile() {
     setLoadingSubmitFace(false);
     setShowCam(true);
     setRetryButtonSubmitFace(false);
-    setUserData({ ...userData, errorFace: "" })
+    setErrorFace("");
     setImgSrc(null);
   }
 
   async function handleRemoveFaceMFA(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorFaceLogin: '' });
+    setErrorFaceLogin("");
     setShowCamRemoveFaceMFA(!showCamRemoveFaceMFA);
     setLoadingRemoveFaceMFA(false);
     setImgSrc(null);
@@ -335,14 +348,14 @@ function Profile() {
     setShowMFA(false);
     setLoadingMFA(false);
     setFaceMFAData(null);
-    setUserData({ ...userData, errorMfaRecord: "" })
+    setErrorMfaRecord("");
   }
 
   function handleRetryRemoveFaceMFA() {
     setLoadingRemoveFaceMFA(false);
     setShowCamRemoveFaceMFA(true);
     setRetryButtonLoginFace(false);
-    setUserData({ ...userData, errorFaceLogin: "" })
+    setErrorFaceLogin("");
   }
 
   async function handleViewFaceMFA(event) {
@@ -352,10 +365,10 @@ function Profile() {
     setLoadingMFA(true);
     setFaceMFAData(null);
     setRetryButtonSubmitFace(false);
-    setUserData({ ...userData, errorMfaRecord: "" })
+    setErrorMfaRecord("");
 
     // clear remove MFA
-    setUserData({ ...userData, errorFaceLogin: '' });
+    setErrorFaceLogin("");
     setShowCamRemoveFaceMFA(false);
     setLoadingRemoveFaceMFA(false);
     setImgSrc(null);
@@ -381,14 +394,14 @@ function Profile() {
       setFaceMFAData(response.data)
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorMfaRecord: error.message })
+      setErrorMfaRecord(error.message)
     }
     setLoadingMFA(false);
   }
 
   async function handleRemoveVoiceMFA(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorVoiceLogin: '' });
+    setErrorVoiceLogin("");
     if (showVoiceRemoveVoiceMFA) {
       setVoiceToken("");
     }
@@ -402,7 +415,7 @@ function Profile() {
     setShowMFA(false);
     setLoadingMFA(false);
     setVoiceMFAData(null);
-    setUserData({ ...userData, errorMfaRecord: "" })
+    setErrorMfaRecord("");
 
     // get token 
     getVoiceToken();
@@ -410,7 +423,7 @@ function Profile() {
 
   function handleRetryRemoveVoiceMFA() {
     //clear state
-    setUserData({ ...userData, errorVoiceLogin: '' });
+    setErrorVoiceLogin("");
     setVoiceToken("")
     setShowVoiceRemoveVoiceMFA(true);
     setLoadingRemoveVoiceMFA(false);
@@ -429,10 +442,10 @@ function Profile() {
     setLoadingMFA(true);
     setVoiceMFAData(null);
     setRetryButtonSubmitVoice(false);
-    setUserData({ ...userData, errorMfaRecord: "" })
+    setErrorMfaRecord("");
 
     // clear remove MFA
-    setUserData({ ...userData, errorVoiceLogin: '' });
+    setErrorVoiceLogin("");
     setShowVoiceRemoveVoiceMFA(false);
     setLoadingRemoveVoiceMFA(false);
     stopRecording();
@@ -459,14 +472,14 @@ function Profile() {
       setVoiceMFAData(response.data)
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorMfaRecord: error.message })
+      setErrorMfaRecord(error.message )
     }
     setLoadingMFA(false);
   }
 
   async function handleSubmitVoice(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorVoice: '' })
+    setErrorVoice("")
     setLoadingSubmitVoice(true);
     setShowVoice(false);
 
@@ -509,12 +522,12 @@ function Profile() {
       } else if (result_message === 'token invalid') {
         router.push('/login_fail') }
       else {
-        setUserData({ ...userData, errorVoice: result_message + " code " + result_code })
+        setErrorVoice(result_message + " code " + result_code )
         setRetryButtonSubmitVoice(true);
       }
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorVoice: error.message })
+      setErrorVoice(error.message )
       setRetryButtonSubmitVoice(true);
     }
     setLoadingSubmitVoice(false)
@@ -522,7 +535,7 @@ function Profile() {
 
   async function handleSubmitFace(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorFace: '' })
+    setErrorFace("")
     setLoadingSubmitFace(true);
     setShowCam(false);
 
@@ -553,12 +566,12 @@ function Profile() {
       } else if (result_message === 'token invalid') {
         router.push('/login_fail') }
       else {
-        setUserData({ ...userData, errorFace: result_message + " code " + result_code })
+        setErrorFace( result_message + " code " + result_code )
         setRetryButtonSubmitFace(true);
       }
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorFace: error.message })
+      setErrorFace(error.message )
       setRetryButtonSubmitFace(true);
     }
     setLoadingSubmitFace(false)
@@ -566,7 +579,7 @@ function Profile() {
 
   async function handleLoginFaceRemoveMFA(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorFaceLogin: '' })
+    setErrorFaceLogin("");
     setLoadingRemoveFaceMFA(true);
     setShowCamRemoveFaceMFA(false);
 
@@ -613,24 +626,24 @@ function Profile() {
             router.push('/mfa_success?op=remove')
           }
           else {
-            setUserData({ ...userData, errorFaceLogin: result_message_r + " code " + result_code_r })
+            setErrorFaceLogin(result_message_r + " code " + result_code_r )
             setRetryButtonLoginFace(true);
           }
         }
         catch(error) {
           console.error(error)
-          setUserData({ ...userData, errorFaceLogin: error.message })
+          setErrorFaceLogin( error.message )
           setRetryButtonLoginFace(true);
         }
       } else if (result_message === 'token invalid') {
         router.push('/login_fail')
       } else {
-        setUserData({ ...userData, errorFaceLogin: result_message + " code " + result_code })
+        setErrorFaceLogin( result_message + " code " + result_code )
         setRetryButtonLoginFace(true);
       }
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorFaceLogin: error.message })
+      setErrorFaceLogin(error.message)
       setRetryButtonLoginFace(true);
     }
     setLoadingRemoveFaceMFA(false)
@@ -638,7 +651,7 @@ function Profile() {
 
   async function handleLoginVoiceRemoveMFA(event) {
     event.preventDefault()
-    setUserData({ ...userData, errorVoiceLogin: '' })
+    setErrorVoiceLogin("")
     setLoadingRemoveVoiceMFA(true);
     setShowVoiceRemoveVoiceMFA(false);
 
@@ -694,24 +707,24 @@ function Profile() {
             router.push('/mfa_success?op=remove')
           }
           else {
-            setUserData({ ...userData, errorVoiceLogin: result_message_r + " code " + result_code_r })
+            setErrorVoiceLogin(result_message_r + " code " + result_code_r )
             setRetryButtonLoginVoice(true);
           }
         }
         catch(error) {
           console.error(error)
-          setUserData({ ...userData, errorVoiceLogin: error.message })
+          setErrorVoiceLogin(error.message)
           setRetryButtonLoginVoice(true);
         }
       } else if (result_message === 'token invalid') {
         router.push('/login_fail')
       } else {
-        setUserData({ ...userData, errorVoiceLogin: result_message + " code " + result_code })
+        setErrorVoiceLogin(result_message + " code " + result_code )
         setRetryButtonLoginVoice(true);
       }
     } catch (error) {
       console.error(error)
-      setUserData({ ...userData, errorVoiceLogin: error.message })
+      setErrorVoiceLogin(error.message )
       setRetryButtonLoginVoice(true);
     }
     setLoadingRemoveVoiceMFA(false)
@@ -769,17 +782,21 @@ function Profile() {
       /> */}
         <img 
         src={`data:image/jpeg;base64,${faceMFAData.image}`}
-      /></form></div>}
+      />
+      {errorMfaRecord && <p className="error">Error: {errorMfaRecord}</p>}
+      </form></div>}
     {(voiceMFAData && showMFA) && 
       <div className="face">
       <form>
       <small>Date added:</small> {voiceMFAData.added_date}
       <audio 
         src={`data:audio/wav;base64,${voiceMFAData.voice}`} controls
-      /></form></div>}
+      />
+      {errorMfaRecord && <p className="error">Error: {errorMfaRecord}</p>}
+      </form></div>}
 
     {/* SUBMIT VOICE FOR MFA */}
-    {(showVoice || loadingSubmitVoice || userData.errorVoice) &&
+    {(showVoice || loadingSubmitVoice || errorVoice) &&
       <div className="face">
           {showVoice && !loadingSubmitVoice && 
           <div style={{visibility: 'hidden', height: 1, width:    1 }}>
@@ -833,7 +850,7 @@ function Profile() {
                   />
               </div>}
               <br/>
-              {userData.errorVoice && <p className="error">Error: {userData.errorVoice}</p>}
+              {errorVoice && <p className="error">Error: {errorVoice}</p>}
               <div style={{
                   display:"flex",
                   justifyContent:"center",
@@ -874,7 +891,7 @@ function Profile() {
     {/* END SUBMIT VOICE FOR MFA */}
 
     {/* SUBMIT VOICE FOR REMOVE MFA */}
-    {(showVoiceRemoveVoiceMFA || loadingRemoveVoiceMFA || userData.errorVoiceLogin) &&
+    {(showVoiceRemoveVoiceMFA || loadingRemoveVoiceMFA || errorVoiceLogin) &&
     <div className="face">
      <form>
       {!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && <div style={{
@@ -948,7 +965,7 @@ function Profile() {
             />
         </div>}
         <br/>
-        {userData.errorVoiceLogin && <p className="error">Error: {userData.errorVoiceLogin}</p>}
+        {errorVoiceLogin && <p className="error">Error: {errorVoiceLogin}</p>}
         <div style={{
             display:"flex",
             justifyContent:"center",
@@ -989,7 +1006,7 @@ function Profile() {
     {/* END SUBMIT VOICE FOR REMOVE MFA */}
 
     {/* SUBMIT FACE FOR MFA */}
-    {(showCam || loadingSubmitFace || userData.errorFace) &&
+    {(showCam || loadingSubmitFace || errorFace) &&
     <div className="face">
      <form>
      {!loadingSubmitFace && showCam && <div style={{
@@ -1033,7 +1050,7 @@ function Profile() {
               src={imgSrc}
             />
           )}
-      {userData.errorFace && <p className="error">Error: {userData.errorFace}</p>}
+      {errorFace && <p className="error">Error: {errorFace}</p>}
       { retryButtonSubmitFace && 
             <button type="submit" onClick={handleRetrySubmitFace}>Retry</button>
           }
@@ -1042,7 +1059,7 @@ function Profile() {
     {/* END SUBMIT FACE FOR MFA */}
 
     {/* SUBMIT FACE FOR REMOVE MFA */}
-    {(showCamRemoveFaceMFA || loadingRemoveFaceMFA || userData.errorFaceLogin) &&
+    {(showCamRemoveFaceMFA || loadingRemoveFaceMFA || errorFaceLogin) &&
     <div className="face">
      <form>
      {!loadingRemoveFaceMFA && showCamRemoveFaceMFA && <div style={{
@@ -1086,7 +1103,7 @@ function Profile() {
               src={imgSrc}
             />
           )}
-      {userData.errorFaceLogin && <p className="error">Error: {userData.errorFaceLogin}</p>}
+      {errorFaceLogin && <p className="error">Error: {errorFaceLogin}</p>}
       { retryButtonLoginFace && 
             <button type="submit" onClick={handleRetryRemoveFaceMFA}>Retry</button>
           }
@@ -1096,7 +1113,7 @@ function Profile() {
     
     <br/>
     <br/>
-    {userData.errorMfa && <p className="error">Error: {userData.errorMfa}</p>}
+    {errorMfa && <p className="error">Error: {errorMfa}</p>}
     
     {/* DISPLAY LOGIN RECORDS */}
      {username && 
@@ -1141,7 +1158,7 @@ function Profile() {
         ))}
         </tbody>
       </table>)}
-        {userData.error && <p className="error">Error: {userData.error}</p>}
+        {error && <p className="error">Error: {error}</p>}
       </div>
 
       {/* DISPLAY VOICE POPUP */}
@@ -1177,7 +1194,7 @@ function Profile() {
             </div>
             </div>
             }
-          {userData.errorVoicePopup && <p className="error">Error: {userData.errorVoicePopup}</p>}
+          {errorVoicePopup && <p className="error">Error: {errorVoicePopup}</p>}
 
         </div>
         </Popup>
@@ -1218,7 +1235,7 @@ function Profile() {
             </div>
             </div>
             }
-            {userData.errorFacePopup && <p className="error">Error: {userData.errorFacePopup}</p>}
+            {errorFacePopup && <p className="error">Error: {errorFacePopup}</p>}
 
         </div>
         </Popup>
