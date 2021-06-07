@@ -724,8 +724,8 @@ function Profile() {
             }}>
     {mfaMethod ? (<>
       {mfaMethod === 1 && <>Your account does not have MFA enabled</>}
-      {mfaMethod === 2 && <>Your account have face-based MFA enabled</>}
-      {mfaMethod === 3 && <>Your account have voice-based MFA enabled</>}
+      {mfaMethod === 2 && <>Your account has face-based MFA enabled</>}
+      {mfaMethod === 3 && <>Your account has voice-based MFA enabled</>}
     </>):(<></>)}
     </div>
     <div style={{
