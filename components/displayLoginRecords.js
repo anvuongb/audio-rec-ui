@@ -286,6 +286,12 @@ export default function DisplayLoginRecords(props) {
           padding: 1rem;
           display: flex;
           justifyContent: center;
+          /* overflow-x: scroll; */
+          overflow-y: scroll;
+          /* max-width: 800px; */
+          max-height: 400px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
         }
         .face {
           max-width: 550px;
