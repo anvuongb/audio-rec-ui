@@ -12,14 +12,14 @@ function LoginSuccess() {
     useEffect(() => {
       setTimeout(
           () => {r.push('/profile?user='+r.query.user+'&token='+r.query.token)},
-          3000,
+          2000,
       )
     }, []);
   } else if (r.query.next_step === "biometrics_face"){
     useEffect(() => {
       setTimeout(
           () => {r.push('/login_face?user='+r.query.user+'&token='+r.query.token)},
-          3000,
+          2000,
       )
     }, []);
   }
@@ -27,7 +27,7 @@ function LoginSuccess() {
     useEffect(() => {
       setTimeout(
           () => {r.push('/login_voice?user='+r.query.user+'&token='+r.query.token)},
-          3000,
+          2000,
       )
     }, []);
   }

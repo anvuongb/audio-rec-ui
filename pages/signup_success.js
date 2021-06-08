@@ -10,7 +10,7 @@ function Signup() {
   useEffect(() => {
     setTimeout(
         () => {Router.push('/login')},
-        3000,
+        2000,
     )
   });
 

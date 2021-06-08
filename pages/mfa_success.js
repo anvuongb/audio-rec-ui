@@ -11,7 +11,7 @@ function MFASuccess() {
     useEffect(() => {
       setTimeout(
           () => {r.push('/login')},
-          3000,
+          2000,
       )
     });
   }
