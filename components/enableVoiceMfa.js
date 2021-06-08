@@ -40,8 +40,11 @@ export default function EnableVoiceMFA(props) {
         setRetryButtonSubmitVoice(false);
     }
     useEffect(() => {
+        if (!props.username || !props.token) {
+            return;
+          }
         clearState();
-      }, []);
+      }, [props.username, props.token]);
     
     function startRecording() {
         setStatus("recording");

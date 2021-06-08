@@ -26,8 +26,11 @@ export default function EnableFaceMFA(props) {
         setLoadingSubmitFace(false);
     }
     useEffect(() => {
+        if (!props.username || !props.token) {
+            return;
+          }
         clearState();
-      }, []);
+      }, [props.username, props.token]);
 
     function handleRetrySubmitFace() {
         setLoadingSubmitFace(false);

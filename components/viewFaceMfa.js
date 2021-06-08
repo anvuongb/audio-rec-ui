@@ -12,8 +12,11 @@ export default function ViewFaceMFA(props) {
     const [loadingMFA, setLoadingMFA] = useState(false);
 
     useEffect(() => {
+        if (!props.username || !props.token) {
+            return;
+          }
         getFaceMFAData();
-      }, []);
+      }, [props.username, props.token]);
 
     async function getFaceMFAData() {
         setLoadingMFA(true);

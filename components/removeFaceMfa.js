@@ -26,8 +26,11 @@ export default function RemoveFaceMFA(props) {
         setImgSrc(null);
     }
     useEffect(() => {
+        if (!props.username || !props.token) {
+            return;
+          }
         clearState();
-      }, []);
+      }, [props.username, props.token]);
 
     function handleRetryRemoveFaceMFA() {
         setLoadingRemoveFaceMFA(false);

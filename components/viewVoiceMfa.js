@@ -11,8 +11,11 @@ export default function ViewVoiceMFA(props) {
     const [loadingMFA, setLoadingMFA] = useState(false);
 
     useEffect(() => {
+        if (!props.username || !props.token) {
+            return;
+          }
         getVoiceMFAData();
-      }, []);
+      }, [props.username, props.token]);
 
     async function getVoiceMFAData() {
         setLoadingMFA(true);

@@ -1,7 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import {useRouter} from 'next/router'
 import Layout from '../components/layout'
-import Webcam from "react-webcam";
 import utilStyles from '../styles/utils.module.css'
 import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +21,6 @@ const ReactMic = dynamic(
 function Login() {
   const router = useRouter() 
 
-  const webcamRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [retryButton, setRetryButton] = useState(false);
   const [showVoice, setShowVoice] = useState(true);

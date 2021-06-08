@@ -45,9 +45,12 @@ export default function RemoveVoiceMFA(props) {
         setVoiceGeneratedText("");
     }
     useEffect(() => {
+        if (!props.username || !props.token) {
+            return;
+          }
         clearState();
         getVoiceToken();
-      }, []);
+      }, [props.username, props.token]);
     
     function startRecording() {
         setStatus("recording");
