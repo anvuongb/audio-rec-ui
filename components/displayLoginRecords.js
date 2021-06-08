@@ -5,8 +5,10 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios'
 import urlBase from '../constant/url'
 import Popup from 'reactjs-popup'
+import {useRouter} from 'next/router'
 
 export default function DisplayLoginRecords(props) {
+    const router = useRouter()
     
     const [loadingPopupFace, setLoadingPopupFace] = useState(false);
     const [loadingPopupVoice, setLoadingPopupVoice] = useState(false);
@@ -64,7 +66,6 @@ export default function DisplayLoginRecords(props) {
         }
         catch (error) {
           console.error(error)
-          setErrorMfa(error.message );
           router.push('/login_fail');
         }
       }

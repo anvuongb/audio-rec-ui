@@ -65,9 +65,14 @@ export default function ViewVoiceMFA(props) {
         {(voiceMFAData) && 
             <div className="face">
             <form>
-            <small>Date added:</small> {voiceMFAData.added_date}
+            <small>Date added: </small> {voiceMFAData.added_date_1}
+            <small>Voice 1</small> 
             <audio 
-              src={`data:audio/wav;base64,${voiceMFAData.voice}`} controls
+              src={`data:audio/wav;base64,${voiceMFAData.voice_1}`} controls
+            />
+            <small>Voice 2</small> 
+            <audio 
+              src={`data:audio/wav;base64,${voiceMFAData.voice_2}`} controls
             />
             {errorMfaRecord && <p className="error">Error: {errorMfaRecord}</p>}
             </form></div>}

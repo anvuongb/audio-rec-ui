@@ -27,6 +27,7 @@ function Login() {
     setShowCam(true);
     setRetryButton(false);
     setUserData({ ...userData, error: "" })
+    setImgSrc(null);
   }
 
   async function handleSubmit(event) {
@@ -110,7 +111,7 @@ function Login() {
             </div>
             </></>) : (<></>)
           }
-          {loading && imgSrc && (
+          {!loading && imgSrc && (
             <img
               src={imgSrc}
             />

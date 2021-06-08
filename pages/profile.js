@@ -6,6 +6,7 @@ import axios from 'axios'
 import urlBase from '../constant/url'
 
 import EnableVoiceMFA from '../components/enableVoiceMfa'
+import EnableVoiceMFAV2 from '../components/enableVoiceMfaV2'
 import RemoveVoiceMFA from '../components/removeVoiceMfa'
 import ViewVoiceMFA from '../components/viewVoiceMfa'
 
@@ -163,7 +164,7 @@ function Profile() {
     {/* END SHOW VOICE MFA */}
 
     {/* SUBMIT VOICE FOR MFA */}
-    {showEnableVoiceMFADialog && <EnableVoiceMFA 
+    {showEnableVoiceMFADialog && <EnableVoiceMFAV2 
       username={router.query.user}
       token={router.query.token}
       />}
@@ -198,7 +199,7 @@ function Profile() {
       token={router.query.token}
       />
     {/* END DISPLAY LOGIN RECORDS */}
-    
+
       <style jsx>{`
         .profile {
           margin: 0 auto;
