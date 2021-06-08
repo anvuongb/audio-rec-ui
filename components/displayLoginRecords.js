@@ -23,16 +23,21 @@ export default function DisplayLoginRecords(props) {
     const [errorFacePopup, setErrorFacePopup] = useState("");
     const [errorVoicePopup, setErrorVoicePopup] = useState("");
 
+    const [popUpVoiceId, setPopUpVoiceId] = useState(null);
+    const [popupFaceId, setPopupFaceId] = useState(null);
+
     const closeFacePopup = () => {
         setShowFacePopup(false);
         setShowFacePopupData(null);
         setLoadingPopupFace(false);
+        setPopupFaceId(null);
       }
     
     const closeVoicePopup = () => {
         setShowVoicePopup(false);
         setShowVoicePopupData(null);
         setLoadingPopupVoice(false);
+        setPopUpVoiceId(null);
       }
 
       useEffect(() => {
@@ -73,6 +78,7 @@ export default function DisplayLoginRecords(props) {
     async function handleShowFacePopup(faceId) {
         setShowFacePopup(true);
         setLoadingPopupFace(true);
+        setPopupFaceId(faceId);
     
         const username = props.username
         const token = props.token
@@ -103,6 +109,7 @@ export default function DisplayLoginRecords(props) {
     async function handleShowVoicePopup(voiceId) {
         setShowVoicePopup(true);
         setLoadingPopupFace(true);
+        setPopUpVoiceId(voiceId)
     
         const username = props.username
         const token = props.token
@@ -185,7 +192,7 @@ export default function DisplayLoginRecords(props) {
           <a className="close" onClick={closeVoicePopup}>
             &times;
           </a>
-          
+          {showVoicePopupData && <small>Voice ID: {popUpVoiceId}</small>}
           {showVoicePopupData && <div><audio src={`data:audio/wav;base64,${showVoicePopupData.voice}`} controls/></div>}
 
           {loadingPopupVoice && <div>
@@ -226,7 +233,7 @@ export default function DisplayLoginRecords(props) {
           <a className="close" onClick={closeFacePopup}>
             &times;
           </a>
-          
+          {showFacePopupData && <small>Face ID: {popupFaceId}</small>}
           {showFacePopupData && <img src={`data:image/jpeg;base64,${showFacePopupData.image}`}/>}
 
           {loadingPopupFace && <div>
