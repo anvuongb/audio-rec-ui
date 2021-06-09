@@ -7,7 +7,7 @@ import Link from 'next/link'
 const name = 'TrueID Biometrics'
 export const siteTitle = 'TrueID Biometrics Demo Website'
 
-export default function Layout({ children, home, login, signup, face, transition, profile }) {
+export default function Layout({ children, home, login, signup, face, transition, profile, reset }) {
   return (
     <div className={styles.container}>
       <Head>
@@ -109,6 +109,15 @@ export default function Layout({ children, home, login, signup, face, transition
         {signup ? (
           <>
           Signup page
+          </>
+        ) : (
+          <>
+          </>
+        )
+        }
+        {reset ? (
+          <>
+          Reset MFA page
           </>
         ) : (
           <>
