@@ -155,7 +155,11 @@ export default function Layout({ children, home, login, signup, face, transition
       <div>
           <div className={styles.phantomStyle} />
           <div className={styles.footerStyle}>
-              { <small>beta - ui@{versionNumber} - api@{apiVersion}</small> }
+              { <small>ui@{versionNumber} - api@{apiVersion}</small> }
+          </div>
+          <div className={styles.phantomStyle} />
+          <div className={styles.footerStyleNote}>
+              { <small>© 2021 TrueID</small> }
           </div>
       </div>
     </div>

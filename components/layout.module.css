@@ -14,10 +14,20 @@
   margin: 3rem 0 0;
 }
 
+.footerStyleNote {
+  text-align: center;
+  padding: 1px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  height: 30px;
+  width: 100%;
+}
+
 .footerStyle {
   background-color: #F8F8F8;
   border-top: 1px solid #E7E7E7;
-  text-align: center;
+  text-align: right;
   padding: 1px;
   position: fixed;
   left: 0;
