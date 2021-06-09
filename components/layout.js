@@ -3,11 +3,30 @@ import Image from 'next/image'
 import styles from './layout.module.css'
 import utilStyles from '../styles/utils.module.css'
 import Link from 'next/link'
+import {urlBase, versionNumber} from '../constant/url'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 
 const name = 'TrueID Biometrics'
 export const siteTitle = 'TrueID Biometrics Demo Website'
 
 export default function Layout({ children, home, login, signup, face, transition, profile, reset }) {
+  const [apiVersion, setApiVersion] = useState("0.0.0");
+  const getApiVersion = async() => {
+    try {
+      const response = await axios.get(
+        urlBase + '/api/version'
+      );
+        const d = response.data
+        setApiVersion(d)
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+  useEffect(() => {
+    getApiVersion();
+  }, []);
   return (
     <div className={styles.container}>
       <Head>
@@ -133,6 +152,12 @@ export default function Layout({ children, home, login, signup, face, transition
           </Link>
         </div>
       )}
+      <div>
+          <div className={styles.phantomStyle} />
+          <div className={styles.footerStyle}>
+              { <small>beta - ui@{versionNumber} - api@{apiVersion}</small> }
+          </div>
+      </div>
     </div>
   )
 }
