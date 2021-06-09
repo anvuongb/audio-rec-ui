@@ -9,6 +9,8 @@ import {useRouter} from 'next/router'
 
 export default function DisplayLoginRecords(props) {
     const router = useRouter()
+
+    const login_counts = 20
     
     const [loadingPopupFace, setLoadingPopupFace] = useState(false);
     const [loadingPopupVoice, setLoadingPopupVoice] = useState(false);
@@ -60,7 +62,8 @@ export default function DisplayLoginRecords(props) {
               },
               params: {
                 request_id: uuidv4(),
-                username: username
+                username: username,
+                limit: login_counts,
               }
             }
           );
@@ -143,7 +146,7 @@ export default function DisplayLoginRecords(props) {
                 display:"flex",
                 justifyContent:"center",
             }}>
-            <b>{props.username}</b>'s last 10 login records
+            <b>{props.username}</b>'s last {login_counts} login records
       </div>
 
       <div className="profile">
@@ -192,7 +195,30 @@ export default function DisplayLoginRecords(props) {
           <a className="close" onClick={closeVoicePopup}>
             &times;
           </a>
-          {showVoicePopupData && <small>Voice ID: {popUpVoiceId}</small>}
+          {showVoicePopupData && 
+            <>
+              <div><small>Voice ID: <b>{popUpVoiceId}</b></small></div>
+              <div><small>Voice passed quality check? {showVoicePopupData.accepted && <Image
+                                                            priority
+                                                            src="/images/green-tick.png"
+                                                            className={utilStyles.borderCircle}
+                                                            height={20}
+                                                            width={20}
+                                                            />}
+                                                      {!showVoicePopupData.accepted && <Image
+                                                          priority
+                                                          src="/images/red-cross.png"
+                                                          className={utilStyles.borderCircle}
+                                                          height={20}
+                                                          width={20}
+                                                          />}
+                  </small>
+              </div>
+              <div><small>Generated OTP Code: <b>{showVoicePopupData.voice_generated_text}</b></small></div>
+              <div><small>Recorded OTP Code: <b>{showVoicePopupData.voice_recorded_text}</b></small></div>
+              <div><small>Result code: <b>{showVoicePopupData.result_code}</b></small></div>
+            </>
+          }
           {showVoicePopupData && <div><audio src={`data:audio/wav;base64,${showVoicePopupData.voice}`} controls/></div>}
 
           {loadingPopupVoice && <div>
@@ -233,7 +259,34 @@ export default function DisplayLoginRecords(props) {
           <a className="close" onClick={closeFacePopup}>
             &times;
           </a>
-          {showFacePopupData && <small>Face ID: {popupFaceId}</small>}
+
+          {showFacePopupData && 
+            <>
+              <small>Face ID: {popupFaceId}</small>
+              <div><small>Face passed quality check? {showFacePopupData.accepted && <Image
+                                                            priority
+                                                            src="/images/green-tick.png"
+                                                            className={utilStyles.borderCircle}
+                                                            height={20}
+                                                            width={20}
+                                                            />}
+                                                      {!showFacePopupData.accepted && <Image
+                                                          priority
+                                                          src="/images/red-cross.png"
+                                                          className={utilStyles.borderCircle}
+                                                          height={20}
+                                                          width={20}
+                                                          />}
+                  </small>
+              </div>
+              <div><small>Is face live? <b>{showFacePopupData.is_face_live.toString()}</b></small></div>
+              <div><small>Is good quality? <b>{showFacePopupData.is_good_quality.toString()}</b></small></div>
+              <div><small>Is face occluded? <b>{showFacePopupData.is_face_occluded.toString()}</b></small></div>
+              <div><small>Are both eyes open? <b>{showFacePopupData.is_eyes_open.toString()}</b></small></div>
+              <div><small>Is good head pose? <b>{showFacePopupData.is_good_headpose.toString()}</b></small></div>
+              <div><small>Result code: <b>{showFacePopupData.result_code}</b></small></div>
+            </>
+          }
           {showFacePopupData && <img src={`data:image/jpeg;base64,${showFacePopupData.image}`}/>}
 
           {loadingPopupFace && <div>
