@@ -10,7 +10,7 @@ import axios from 'axios'
 const name = 'TrueID Biometrics'
 export const siteTitle = 'TrueID Biometrics Demo Website'
 
-export default function Layout({ children, home, login, signup, face, transition, profile, reset }) {
+export default function Layout({ children, home, login, signup, face, transition, profile, reset, resetpassword }) {
   const [apiVersion, setApiVersion] = useState("0.0.0");
   const getApiVersion = async() => {
     try {
@@ -137,6 +137,15 @@ export default function Layout({ children, home, login, signup, face, transition
         {reset ? (
           <>
           Reset MFA page
+          </>
+        ) : (
+          <>
+          </>
+        )
+        }
+        {resetpassword ? (
+          <>
+          Reset password page
           </>
         ) : (
           <>

@@ -31,6 +31,12 @@ export default function Home({allPostsData}) {
             <a>logging in</a>
           </Link>
         </p>
+
+        <p>
+          Having trouble logging in? You can reset your MFA records or change password <Link href="/reset">
+            <a>here</a>
+          </Link>
+        </p>
       </section>
     </Layout>
   )

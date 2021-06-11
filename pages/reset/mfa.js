@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Router from 'next/router'
-import Layout from '../components/layout'
+import Layout from '../../components/layout'
 import { v4 as uuidv4 } from 'uuid';
-import urlBase from '../constant/url'
+import {urlBase, resetToken} from '../../constant/url'
 import Head from 'next/head'
 import axios from 'axios'
 
@@ -25,7 +25,7 @@ function Reset() {
       const response = await fetch(urlBase + '/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json',
-                   'Reset-Token': 'Beaer ' + 'u8Vi7QXOE6kOssCg0GfV9V2oSuj4wvn',  
+                   'Reset-Token': 'Beaer ' + resetToken,  
                 },
         body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "user_passwd":password }),
       })
@@ -60,7 +60,7 @@ function Reset() {
                     const response = await fetch(urlBase + '/api/login', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json',
-                                 'Reset-Token': 'Beaer ' + 'u8Vi7QXOE6kOssCg0GfV9V2oSuj4wvn',  
+                                 'Reset-Token': 'Beaer ' + resetToken,  
                               },
                       body: JSON.stringify({"request_id":uuidv4(), "user_name":username, "user_passwd":password }),
                     })
@@ -91,7 +91,7 @@ function Reset() {
                           const result_message_v = responseRemove.data.result_message
               
                           if (result_code_v === 1 ) {
-                            Router.push("/reset_success")
+                            Router.push("/reset_success?op=mfa")
                             } else {
                               setUserData({ ...userData, error: result_message_v })
                             }

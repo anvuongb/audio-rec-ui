@@ -1,15 +1,16 @@
 
 import Layout from '../components/layout'
-import Router from 'next/router'
+import {useRouter} from 'next/router'
 import {useEffect} from 'react'
 import Image from 'next/image'
 import utilStyles from '../styles/utils.module.css'
 
 function Reset() {
+  const r = useRouter()
 
   useEffect(() => {
     setTimeout(
-        () => {Router.push('/login')},
+        () => {r.push('/login')},
         2000,
     )
   });
@@ -20,7 +21,7 @@ function Reset() {
         display:"flex",
         justifyContent:"center",
     }}>
-    Reset MFA success, redirecting to login page
+    Update {r.query.op} success, redirecting to login page
     </div>
     <>
     <div style={{
