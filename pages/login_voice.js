@@ -153,8 +153,17 @@ function Login() {
       } else if (result_message === 'token invalid') {
         router.push('/login_fail')
       } else {
-        setUserData({ ...userData, error: result_message + " code " + result_code })
         setRetryButton(true);
+        switch(result_code) {
+          case -8:
+            setUserData({ ...userData, error: "voice MFA is not activated" })
+            break;
+          case -7:
+            setUserData({ ...userData, error: "voice quality not accepted, recorded text and generated text do not match" })
+            break;
+          default:
+            setUserData({ ...userData, error: "something went wrong, code " + result_code })
+        }
       }
     } catch (error) {
       console.error(error)

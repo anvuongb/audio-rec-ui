@@ -81,9 +81,22 @@ function Login() {
       if (result_code === 1 && next_step === "done") {
         setMasterToken(newToken)
       } else {
-        setUserData({ ...userData, error: result_message + " code " + result_code })
         setRetryButton(true);
         setMasterToken(null);
+        switch(result_code) {
+          case -6:
+            if (result_message.includes("liveness")) {
+              setUserData({ ...userData, error: "face is not live, please take a live photo" })
+            } else {
+              setUserData({ ...userData, error: "face quality not accepted" })
+            }
+            break;
+          case -7:
+            setUserData({ ...userData, error: "face MFA is not activated" })
+            break;
+          default:
+            setUserData({ ...userData, error: "something went wrong, code " + result_code })
+        }
       }
     } catch (error) {
       console.error(error)
