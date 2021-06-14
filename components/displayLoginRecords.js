@@ -262,7 +262,7 @@ export default function DisplayLoginRecords(props) {
 
           {showFacePopupData && 
             <>
-              <small>Face ID: {popupFaceId}</small>
+              <div><small>Face ID: <b>{popupFaceId}</b></small></div>
               <div><small>Face passed quality check? {showFacePopupData.accepted && <Image
                                                             priority
                                                             src="/images/green-tick.png"
