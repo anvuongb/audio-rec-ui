@@ -60,11 +60,11 @@ export default function EnableVoiceMFAV2(props) {
       }
      
     function onData(recordedBlob) {
-        console.log('chunk of real-time data is: ', recordedBlob);
+        // console.log('chunk of real-time data is: ', recordedBlob);
       }
      
     function onStop(recordedBlob) {
-        console.log('recordedBlob is: ', recordedBlob);
+        // console.log('recordedBlob is: ', recordedBlob);
         setMediaBlob(recordedBlob.blob)
         setMediaBlobUrl(recordedBlob.blobURL);
       }

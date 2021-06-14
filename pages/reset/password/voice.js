@@ -71,11 +71,11 @@ function Login() {
   }
  
   function onData(recordedBlob) {
-    console.log('chunk of real-time data is: ', recordedBlob);
+    // console.log('chunk of real-time data is: ', recordedBlob);
   }
  
   function onStop(recordedBlob) {
-    console.log('recordedBlob is: ', recordedBlob);
+    // console.log('recordedBlob is: ', recordedBlob);
     setMediaBlob(recordedBlob.blob)
     setMediaBlobUrl(recordedBlob.blobURL);
   }
@@ -142,7 +142,7 @@ function Login() {
     formData.append("voice_generated_text", voiceGeneratedText)
     // formData.append("sound_rate", 44100)
 
-    console.log(formData)
+    // console.log(formData)
 
 
     try {
