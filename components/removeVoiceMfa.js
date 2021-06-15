@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios'
-import urlBase from '../constant/url'
+import {urlBase, maxVoiceLength} from '../constant/url'
 import {useRouter} from 'next/router'
 
 const ReactMic = dynamic(
@@ -24,6 +24,7 @@ export default function RemoveVoiceMFA(props) {
     const [isRecord, setIsRecord] = useState(false);
 
     const [errorVoiceLogin, setErrorVoiceLogin] = useState("");
+    const [audioLengthAccept, setAudioLengthAccept] = useState(true);
     
     const [showVoiceRemoveVoiceMFA, setShowVoiceRemoveVoiceMFA] = useState(false);
     const [loadingRemoveVoiceMFA, setLoadingRemoveVoiceMFA] = useState(false);
@@ -33,6 +34,7 @@ export default function RemoveVoiceMFA(props) {
 
     function clearState() {
         setErrorVoiceLogin("");
+        setAudioLengthAccept(true);
         setShowVoiceRemoveVoiceMFA(!showVoiceRemoveVoiceMFA);
         stopRecording();
         clearBlobUrl();
@@ -70,6 +72,10 @@ export default function RemoveVoiceMFA(props) {
         // console.log('recordedBlob is: ', recordedBlob);
         setMediaBlob(recordedBlob.blob)
         setMediaBlobUrl(recordedBlob.blobURL);
+        if ((recordedBlob.stopTime - recordedBlob.startTime)/1000 > maxVoiceLength) {
+          setErrorVoiceLogin(`audio file too long ${(recordedBlob.stopTime - recordedBlob.startTime)/1000}s, maximum allowed ${maxVoiceLength}s` )
+          setAudioLengthAccept(false);
+        }
       }
     function clearBlobUrl() {
         setMediaBlob(null);
@@ -110,7 +116,8 @@ export default function RemoveVoiceMFA(props) {
     function handleRetryRemoveVoiceMFA() {
         //clear state
         setErrorVoiceLogin("");
-        setVoiceToken("")
+        setVoiceToken("");
+        setAudioLengthAccept(true);
         setShowVoiceRemoveVoiceMFA(true);
         setLoadingRemoveVoiceMFA(false);
         stopRecording();
@@ -283,10 +290,10 @@ export default function RemoveVoiceMFA(props) {
             display:"flex",
             justifyContent:"center",
         }}>
-          {retryButtonLoginVoice && <button onClick={handleRetryRemoveVoiceMFA}>Retry</button>}
-          {(!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
-          {(!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && mediaBlobUrl && status!=="recording") && <button onClick={handleLoginVoiceRemoveMFA}>Submit Voice</button> }
-          {(!loadingRemoveVoiceMFA && showVoiceRemoveVoiceMFA && mediaBlobUrl && status!=="recording") && <button onClick={handleRetryRemoveVoiceMFA}>Re-record</button> }
+          {(retryButtonLoginVoice || !audioLengthAccept) && <button onClick={handleRetryRemoveVoiceMFA}>Retry</button>}
+          {(!loadingRemoveVoiceMFA && audioLengthAccept && showVoiceRemoveVoiceMFA && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
+          {(!loadingRemoveVoiceMFA && audioLengthAccept && showVoiceRemoveVoiceMFA && mediaBlobUrl && status!=="recording") && <button onClick={handleLoginVoiceRemoveMFA}>Submit Voice</button> }
+          {(!loadingRemoveVoiceMFA && audioLengthAccept && showVoiceRemoveVoiceMFA && mediaBlobUrl && status!=="recording") && <button onClick={handleRetryRemoveVoiceMFA}>Re-record</button> }
         </div>
         {loadingRemoveVoiceMFA ? (<>
           <div style={{

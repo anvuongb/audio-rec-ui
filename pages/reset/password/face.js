@@ -94,6 +94,9 @@ function Login() {
           case -7:
             setUserData({ ...userData, error: "face MFA is not activated" })
             break;
+          case -10:
+            setUserData({ ...userData, error: "wrong credentials, face does not match" })
+            break;
           default:
             setUserData({ ...userData, error: "something went wrong, code " + result_code })
         }

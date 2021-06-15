@@ -4,7 +4,7 @@ import Layout from '../../../components/layout'
 import utilStyles from '../../../styles/utils.module.css'
 import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid';
-import {urlBase, resetToken} from '../../../constant/url'
+import {urlBase, resetToken, maxVoiceLength} from '../../../constant/url'
 import axios from 'axios'
 import Head from 'next/head'
 
@@ -26,6 +26,7 @@ function Login() {
   const [showVoice, setShowVoice] = useState(true);
   const [voiceToken, setVoiceToken] = useState("");
   const [voiceGeneratedText, setVoiceGeneratedText] = useState("");
+  const [audioLengthAccept, setAudioLengthAccept] = useState(true);
 
   const [userData, setUserData] = useState({
     error: '',
@@ -78,6 +79,10 @@ function Login() {
     // console.log('recordedBlob is: ', recordedBlob);
     setMediaBlob(recordedBlob.blob)
     setMediaBlobUrl(recordedBlob.blobURL);
+    if ((recordedBlob.stopTime - recordedBlob.startTime)/1000 > maxVoiceLength) {
+      setUserData({ ...userData, error: `audio file too long ${(recordedBlob.stopTime - recordedBlob.startTime)/1000}s, maximum allowed ${maxVoiceLength}s` })
+      setAudioLengthAccept(false);
+    }
   }
   function clearBlobUrl() {
     setMediaBlob(null);
@@ -86,6 +91,7 @@ function Login() {
 
   function handleRetry() {
     setUserData({ ...userData, error: '' })
+    setAudioLengthAccept(true);
     setFixedInput(false);
     setShowVoice(true);
     stopRecording();
@@ -179,6 +185,12 @@ function Login() {
             break;
           case -7:
             setUserData({ ...userData, error: "voice quality not accepted, recorded text and generated text do not match" })
+            break;
+          case -11:
+            setUserData({ ...userData, error: "wrong credentials, voice does not match" })
+            break;
+          case -14:// too long audio file
+            setUserData({ ...userData, error: result_message })
             break;
           default:
             setUserData({ ...userData, error: "something went wrong, code " + result_code })
@@ -364,10 +376,10 @@ function Login() {
                   display:"flex",
                   justifyContent:"center",
               }}>
-                {retryButton && <button onClick={handleRetry}>Retry</button>}
-                {(!loading && showVoice && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
-                {(!loading && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleSubmit}>Submit Voice</button> }
-                {(!loading && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleRetry}>Re-record</button> }
+                {(retryButton || !audioLengthAccept) && <button onClick={handleRetry}>Retry</button>}
+                {(audioLengthAccept && !loading && showVoice && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
+                {(audioLengthAccept && !loading && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleSubmit}>Submit Voice</button> }
+                {(audioLengthAccept && !loading && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleRetry}>Re-record</button> }
               </div>
               {loading ? (<>
                 <div style={{

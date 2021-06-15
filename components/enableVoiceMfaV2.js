@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios'
-import urlBase from '../constant/url'
+import {urlBase, maxVoiceLength} from '../constant/url'
 import {useRouter} from 'next/router'
 
 const ReactMic = dynamic(
@@ -30,6 +30,8 @@ export default function EnableVoiceMFAV2(props) {
     const [retryButtonSubmitVoice, setRetryButtonSubmitVoice] = useState(false);
 
     const [firstVoiceComplete, setFirstVoiceComplete] = useState(false);
+
+    const [audioLengthAccept, setAudioLengthAccept] = useState(true);
 
     function clearState() {
         setErrorVoice("");
@@ -67,6 +69,10 @@ export default function EnableVoiceMFAV2(props) {
         // console.log('recordedBlob is: ', recordedBlob);
         setMediaBlob(recordedBlob.blob)
         setMediaBlobUrl(recordedBlob.blobURL);
+        if ((recordedBlob.stopTime - recordedBlob.startTime)/1000 > maxVoiceLength) {
+          setErrorVoice( `audio file too long ${(recordedBlob.stopTime - recordedBlob.startTime)/1000}s, maximum allowed ${maxVoiceLength}s` )
+          setAudioLengthAccept(false);
+        }
       }
     function clearBlobUrl() {
         setMediaBlob(null);
@@ -75,6 +81,7 @@ export default function EnableVoiceMFAV2(props) {
 
     function handleRetrySubmitVoice() {
         setErrorVoice("");
+        setAudioLengthAccept(true);
         setShowVoice(true);
         stopRecording();
         clearBlobUrl();
@@ -271,13 +278,13 @@ export default function EnableVoiceMFAV2(props) {
                     display:"flex",
                     justifyContent:"center",
                 }}>
-                  {retryButtonSubmitVoice && <button onClick={handleRetrySubmitVoice}>Retry</button>}
-                  {(!loadingSubmitVoice && showVoice && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
-                  {(!loadingSubmitVoice && showVoice && mediaBlobUrl && status!=="recording") && !firstVoiceComplete &&
+                  {(retryButtonSubmitVoice || !audioLengthAccept) && <button onClick={handleRetrySubmitVoice}>Retry</button>}
+                  {(!loadingSubmitVoice && audioLengthAccept && showVoice && status==="recording") && <button onClick={stopRecording}>Stop Recording</button>}
+                  {(!loadingSubmitVoice && audioLengthAccept && showVoice && mediaBlobUrl && status!=="recording") && !firstVoiceComplete &&
                         <button onClick={handleSubmitVoiceFirst}>Submit Voice</button> }
-                  {(!loadingSubmitVoice && showVoice && mediaBlobUrl && status!=="recording") && firstVoiceComplete &&
+                  {(!loadingSubmitVoice && audioLengthAccept && showVoice && mediaBlobUrl && status!=="recording") && firstVoiceComplete &&
                         <button onClick={handleSubmitVoiceSecond}>Submit Voice</button> }
-                  {(!loadingSubmitVoice && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleRetrySubmitVoice}>Re-record</button> }
+                  {(!loadingSubmitVoice && audioLengthAccept && showVoice && mediaBlobUrl && status!=="recording") && <button onClick={handleRetrySubmitVoice}>Re-record</button> }
                 </div>
                 {loadingSubmitVoice ? (<>
                   <div style={{
