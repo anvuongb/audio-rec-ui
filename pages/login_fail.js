@@ -10,7 +10,7 @@ function LoginFail() {
   useEffect(() => {
     setTimeout(
         () => {r.push('/login')},
-        2000,
+        3000,
     )
   });
 
@@ -20,7 +20,7 @@ function LoginFail() {
         display:"flex",
         justifyContent:"center",
     }}>
-    Failed too many times, re-directing you to Login page
+    Token expired or too many failed attempts fetching resources, re-directing you to Login page
     </div>
     <>
     <div style={{
