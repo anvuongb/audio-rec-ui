@@ -1,4 +1,6 @@
 import Image from 'next/image'
+import styles from './layout.module.css'
+import Link from 'next/link'
 import utilStyles from '../styles/utils.module.css'
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from 'react'
@@ -275,14 +277,18 @@ export default function VoiceRecording(props) {
                   justifyContent:"center",
               }}>
               
-              {!firstVoiceComplete && <>Record the following sentence&nbsp;<b>without</b>&nbsp;mask</>}
-              {firstVoiceComplete && !secondVoiceComplete && <>Record the following sentence&nbsp;<b>with</b>&nbsp;mask</>}
-              {secondVoiceComplete && <p>
+              {!firstVoiceComplete && <div>Record the following sentence&nbsp;<b>without</b>&nbsp;mask</div>}
+              {firstVoiceComplete && !secondVoiceComplete && <div>Record the following sentence&nbsp;<b>with</b>&nbsp;mask</div>}
+              {secondVoiceComplete && <div>
               Thank you for your participation.
               Your recording ID is&nbsp;<b>{fileId}</b>, contact us with this ID if you want your record removed.
-              </p>}
-
               </div>}
+              </div>}
+              {secondVoiceComplete && <div className={styles.backToHome}>
+                  <a onClick={() => {window.location.href="/"}}>← Do it again?</a>
+                </div>}
+
+              
               {!loadingSubmitVoice && showVoice &&<div style={{
                     display:"flex",
                     justifyContent:"center",
@@ -372,6 +378,10 @@ export default function VoiceRecording(props) {
           margin: 0.5rem 0 0;
           color: brown;
         }
+
+        a:hover {
+          cursor:pointer;
+         }
       `}</style>
     </>
   )
