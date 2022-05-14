@@ -7,8 +7,8 @@ import {urlBase, versionNumber} from '../constant/url'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
-const name = 'TrueID Biometrics'
-export const siteTitle = 'TrueID Biometrics Demo Website'
+const name = 'voice data collection'
+export const siteTitle = 'Voice data collection'
 
 export default function Layout({ children, home, login, signup, face, transition, profile, reset, resetpassword }) {
   const [apiVersion, setApiVersion] = useState("0.0.0");
@@ -50,10 +50,10 @@ export default function Layout({ children, home, login, signup, face, transition
           <>
             <Image
               priority
-              src="/images/logo_2.png"
+              src="/images/cat.jpg"
               className={utilStyles.borderCircle}
               height={144}
-              width={144}
+              width={200}
               alt={name}
             />
             <h1 className={utilStyles.heading2Xl}>{name}</h1>
@@ -65,7 +65,7 @@ export default function Layout({ children, home, login, signup, face, transition
               <a>
                 <Image
                   priority
-                  src="/images/logo_2.png"
+                  src="/images/cat.jpg"
                   className={utilStyles.borderCircle}
                   height={108}
                   width={108}
@@ -87,7 +87,7 @@ export default function Layout({ children, home, login, signup, face, transition
               <a>
                 <Image
                   priority
-                  src="/images/logo_2.png"
+                  src="/images/cat.jpg"
                   className={utilStyles.borderCircle}
                   height={108}
                   width={108}
@@ -101,51 +101,6 @@ export default function Layout({ children, home, login, signup, face, transition
               </Link>
             </h2>
           </>
-          </>
-        ) : (
-          <>
-          </>
-        )
-        }
-        {face ? (
-          <>
-          MFA Face login page
-          </>
-        ) : (
-          <>
-          </>
-        )
-        }
-        {login ? (
-          <>
-          Login page
-          </>
-        ) : (
-          <>
-          </>
-        )
-        }
-        {signup ? (
-          <>
-          Signup page
-          </>
-        ) : (
-          <>
-          </>
-        )
-        }
-        {reset ? (
-          <>
-          Reset MFA page
-          </>
-        ) : (
-          <>
-          </>
-        )
-        }
-        {resetpassword ? (
-          <>
-          Reset password page
           </>
         ) : (
           <>
@@ -168,7 +123,7 @@ export default function Layout({ children, home, login, signup, face, transition
           </div>
           <div className={styles.phantomStyle} />
           <div className={styles.footerStyleNote}>
-              { <small>© 2021 TrueID</small> }
+              { <small>© 2022</small> }
           </div>
       </div>
     </div>

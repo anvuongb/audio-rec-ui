@@ -15,8 +15,12 @@ const ReactMic = dynamic(
 );
 
 
-export default function EnableVoiceMFAV2(props) {
+export default function VoiceRecording(props) {
     const router = useRouter()
+
+    const [requestId, setRequestId] = useState("");
+    const [fileId, setFileId] = useState("");
+    const [generatedText, setGeneratedText] = useState("");
 
     const [mediaBlob, setMediaBlob] = useState(null);
     const [mediaBlobUrl, setMediaBlobUrl] = useState(null);
@@ -30,11 +34,13 @@ export default function EnableVoiceMFAV2(props) {
     const [retryButtonSubmitVoice, setRetryButtonSubmitVoice] = useState(false);
 
     const [firstVoiceComplete, setFirstVoiceComplete] = useState(false);
+    const [secondVoiceComplete, setSecondVoiceComplete] = useState(false);
 
     const [audioLengthAccept, setAudioLengthAccept] = useState(true);
 
     function clearState() {
         setErrorVoice("");
+        setRequestId("");
         setShowVoice(!showVoice);
         stopRecording();
         clearBlobUrl();
@@ -43,13 +49,46 @@ export default function EnableVoiceMFAV2(props) {
         setLoadingSubmitVoice(false);
         setRetryButtonSubmitVoice(false);
         setFirstVoiceComplete(false);
+        setSecondVoiceComplete(false);
     }
     useEffect(() => {
-        if (!props.username || !props.token) {
-            return;
-          }
         clearState();
-      }, [props.username, props.token]);
+        initMetadata();
+      }, []);
+
+    const initMetadata = async() => {
+        try {
+          const request_id = uuidv4();
+          setRequestId(request_id);  
+          const response = await axios.get(
+            urlBase + '/api/initMetadata',
+            {
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              params: {
+                request_id: request_id,
+              }
+            }
+          );
+            const file_id = response.data.file_id
+            const result_code = response.data.result_code
+            const result_message = response.data.result_message
+            const generated_text = response.data.generated_text
+
+            if (result_code !== 1) {
+                console.log(result_message)
+                router.push('/');
+            }
+
+            setFileId(file_id);
+            setGeneratedText(generated_text);
+        }
+        catch (error) {
+          console.error(error)
+          router.push('/');
+        }
+      }
     
     function startRecording() {
         setStatus("recording");
@@ -96,26 +135,22 @@ export default function EnableVoiceMFAV2(props) {
         setLoadingSubmitVoice(true);
         setShowVoice(false);
 
-        const username = props.username
-        const token = props.token
-
         const formData = new FormData();
         formData.append("file", mediaBlob);
-        formData.append("request_id", uuidv4());
-        formData.append("username", username);
-        // formData.append("sound_rate", 44100)
+        formData.append("request_id", requestId);
+        formData.append("file_id", fileId);
+        formData.append("generated_text", generatedText);
+        formData.append("sound_rate", 44100);
+        formData.append("masked", 0);
 
         try {
             const response = await axios.post( 
-            urlBase + '/api/create/voice/first', formData, 
+            urlBase + '/api/saveAudio', formData, 
             {
                 headers: {
-                'Content-Type': "multipart/form-data", 'Authorization': 'Bearer ' + token 
+                'Content-Type': "multipart/form-data"
                 },
                 params: {
-                request_id: uuidv4(),
-                username: username,
-                sound_rate: 44100
                 }
             }
             );
@@ -126,16 +161,14 @@ export default function EnableVoiceMFAV2(props) {
             const r = response.data
             const result_code = r.result_code
             const result_message = r.result_message
-            const accepted = r.accepted
-            if (accepted) {
+            
+            if (result_code) {
                 setFirstVoiceComplete(true);
                 setShowVoice(true);
                 stopRecording();
                 clearBlobUrl();
                 setErrorVoice("");
-            } else if (result_message === 'token invalid') {
-                setFirstVoiceComplete(false);
-                router.push('/login_fail') }
+            } 
             else {
                 setErrorVoice(result_message + " code " + result_code )
                 setFirstVoiceComplete(false);
@@ -156,26 +189,22 @@ export default function EnableVoiceMFAV2(props) {
         setLoadingSubmitVoice(true);
         setShowVoice(false);
 
-        const username = props.username
-        const token = props.token
-
         const formData = new FormData();
         formData.append("file", mediaBlob);
-        formData.append("request_id", uuidv4());
-        formData.append("username", username);
-        // formData.append("sound_rate", 44100)
+        formData.append("request_id", requestId);
+        formData.append("file_id", fileId);
+        formData.append("generated_text", generatedText);
+        formData.append("sound_rate", 44100);
+        formData.append("masked", 1);
 
         try {
             const response = await axios.post( 
-            urlBase + '/api/create/voice/second', formData, 
+            urlBase + '/api/saveAudio', formData, 
             {
                 headers: {
-                'Content-Type': "multipart/form-data", 'Authorization': 'Bearer ' + token 
+                'Content-Type': "multipart/form-data"
                 },
                 params: {
-                request_id: uuidv4(),
-                username: username,
-                sound_rate: 44100
                 }
             }
             );
@@ -186,11 +215,13 @@ export default function EnableVoiceMFAV2(props) {
             const r = response.data
             const result_code = r.result_code
             const result_message = r.result_message
-            const accepted = r.accepted
-            if (accepted) {
-                router.push('/mfa_success?op=add')
-            } else if (result_message === 'token invalid') {
-                router.push('/login_fail') }
+            if (result_code) {
+                setSecondVoiceComplete(true);
+                setShowVoice(true);
+                stopRecording();
+                clearBlobUrl();
+                setErrorVoice("");
+            } 
             else {
                 setErrorVoice(result_message + " code " + result_code )
                 setRetryButtonSubmitVoice(true);
@@ -206,7 +237,7 @@ export default function EnableVoiceMFAV2(props) {
 
   return (
       <>
-    {(showVoice || loadingSubmitVoice || errorVoice) &&
+    {(showVoice || loadingSubmitVoice || errorVoice ) &&
         <div className="face">
             {showVoice && !loadingSubmitVoice && 
             <div style={{visibility: 'hidden', height: 1, width:    1 }}>
@@ -227,30 +258,43 @@ export default function EnableVoiceMFAV2(props) {
               }}>
               <b>Step: &nbsp;</b> 1
               </div>}
-              {firstVoiceComplete && <div style={{
+              {firstVoiceComplete && !secondVoiceComplete && <div style={{
                   display:"flex",
                   justifyContent:"center",
               }}>
               <b>Step: &nbsp;</b> 2
               </div>}
+              {secondVoiceComplete && <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+              <b>Done &nbsp;</b> 
+              </div>}
               {!loadingSubmitVoice && showVoice && <div style={{
                   display:"flex",
                   justifyContent:"center",
               }}>
-              <b>{props.username}</b>, record the following text to create voice-based MFA
+              
+              {!firstVoiceComplete && <>Record the following sentence&nbsp;<b>without</b>&nbsp;mask</>}
+              {firstVoiceComplete && !secondVoiceComplete && <>Record the following sentence&nbsp;<b>with</b>&nbsp;mask</>}
+              {secondVoiceComplete && <p>
+              Thank you for your participation.
+              Your recording ID is&nbsp;<b>{fileId}</b>, contact us with this ID if you want your record removed.
+              </p>}
+
               </div>}
               {!loadingSubmitVoice && showVoice &&<div style={{
                     display:"flex",
                     justifyContent:"center",
                 }}>
-                {!firstVoiceComplete && <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;đây là giọng nói của tôi&nbsp;&nbsp;</h2>}
-                {firstVoiceComplete && <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;tôi đã đọc và đồng ý&nbsp;&nbsp;</h2>}
+                {!firstVoiceComplete && <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;{generatedText}&nbsp;&nbsp;</h2>}
+                {firstVoiceComplete && !secondVoiceComplete && <h2 style={{backgroundColor: "#DAF7A6"}}>&nbsp;&nbsp;{generatedText}&nbsp;&nbsp;</h2>}
               </div>}
               <div style={{
                   display:"flex",
                   justifyContent:"center",
               }}>
-                {status!=="recording" && !mediaBlobUrl && <button onClick={startRecording}>Start Recording</button>}
+                {status!=="recording" && !mediaBlobUrl && !secondVoiceComplete && <button onClick={startRecording}>Start Recording</button>}
               </div>
               <div style={{
                     display:"flex",
@@ -291,7 +335,7 @@ export default function EnableVoiceMFAV2(props) {
                       display:"flex",
                       justifyContent:"center",
                   }}>
-                  Calculating voice attributes ...
+                  Saving your voice ...
                   </div>
                   
                   <>
