@@ -89,15 +89,15 @@ export default function Layout({ children, home, login, signup, face, transition
                   priority
                   src="/images/cat.jpg"
                   className={utilStyles.borderCircle}
-                  height={108}
-                  width={108}
+                  height={144}
+                  width={200}
                   alt={name}
                 />
               </a>
             </Link>
             <h2 className={utilStyles.headingLg}>
               <Link href="/">
-                <a className={utilStyles.colorInherit}>{name} profile page</a>
+                <a className={utilStyles.colorInherit}>{name} records page</a>
               </Link>
             </h2>
           </>
