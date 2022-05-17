@@ -95,7 +95,7 @@ export default function DisplayLoginRecords(props) {
           );
           if (response.data.length > 0) {
             const dataF = response.data.map((d) => Object.assign({}, ...
-              Object.entries(d).filter(([k,v]) => k==='request_id' || k==='file_id' || k==='generated_text' || k==='created_at' || k==='masked_file_uploaded' || k==='nomasked_file_uploaded').map(([k,v]) => {
+              Object.entries(d).filter(([k,v]) => k==='request_id' || k==='file_id' || k==='generated_text' || k==='created_at_str' || k==='masked_file_uploaded' || k==='nomasked_file_uploaded').map(([k,v]) => {
                 if (v==="request_id") {
                   return {[k]:"Request ID"}
                 }
@@ -220,7 +220,7 @@ export default function DisplayLoginRecords(props) {
         display:"flex",
         justifyContent:"center"}}><table ref={tableRef}>
         <thead>
-        <tr key={"header"}>{Object.keys({"File ID":"", "Generated Text":"", "Masked off file":"", "Masked on file":"", "Date created":""}).map((key) => (<th key={uuidv4()}>{key}</th>))}</tr>
+        <tr key={"header"}>{Object.keys({"File ID":"", "Generated Text":"", "Mask off audio":"", "Mask on audio":"", "Date created":""}).map((key) => (<th key={uuidv4()}>{key}</th>))}</tr>
         </thead>
         <tbody>
         {dataFilter.map((item) => (
@@ -233,7 +233,7 @@ export default function DisplayLoginRecords(props) {
                   className={utilStyles.borderCircle}
                   height={35}
                   width={35}
-                  /></a> <a href={urlBase + '/api/getAudio?file_id=' + item["file_id"] + '&masked=false'}><Image
+                  /></a> <a href={urlBase + '/api/getAudioRaw/'+ item["file_id"] + '_nomasked.wav'}><Image
                   priority
                   src="/images/Download.png"
                   className={utilStyles.borderCircle}
@@ -247,7 +247,7 @@ export default function DisplayLoginRecords(props) {
                   className={utilStyles.borderCircle}
                   height={35}
                   width={35}
-                  /></a> <a href={urlBase + '/api/getAudio?file_id=' + item["file_id"] + '&masked=true'}><Image
+                  /></a> <a href={urlBase + '/api/getAudioRaw/'+ item["file_id"] + '_masked.wav'}><Image
                   priority
                   src="/images/Download.png"
                   className={utilStyles.borderCircle}
@@ -255,7 +255,7 @@ export default function DisplayLoginRecords(props) {
                   width={35}
                   /></a></td>}
             {!item["masked_file_uploaded"] && <td key={uuidv4()}>No file uploaded</td>}
-            <td key={uuidv4()}>{item["created_at"]}</td>
+            <td key={uuidv4()}>{item["created_at_str"]}</td>
           </tr>
         ))}
         </tbody>
