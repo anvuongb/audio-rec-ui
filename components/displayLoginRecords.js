@@ -95,7 +95,7 @@ export default function DisplayLoginRecords(props) {
           );
           if (response.data.length > 0) {
             const dataF = response.data.map((d) => Object.assign({}, ...
-              Object.entries(d).filter(([k,v]) => k==='request_id' || k==='file_id' || k==='generated_text' || k==='created_at_str' || k==='masked_file_uploaded' || k==='nomasked_file_uploaded').map(([k,v]) => {
+              Object.entries(d).filter(([k,v]) => k==='request_id' || k==='file_id' || k==='generated_text' || k==='created_at_str' || k==='masked_file_uploaded' || k==='nomasked_file_uploaded'|| k==='gender'|| k==='country'|| k==='mask_type').map(([k,v]) => {
                 if (v==="request_id") {
                   return {[k]:"Request ID"}
                 }
@@ -105,7 +105,16 @@ export default function DisplayLoginRecords(props) {
                 if (v==="generated_text") {
                   return {[k]:"Generated Text"}
                 }
-                if (v==="created_at") {
+                if (v==="country") {
+                  return {[k]:"Country"}
+                }
+                if (v==="gender") {
+                  return {[k]:"Gender"}
+                }
+                if (v==="mask_type") {
+                  return {[k]:"Mask type"}
+                }
+                if (v==="created_at_str") {
                   return {[k]:"Created At"}
                 }
                 return {[k]:v}
@@ -220,7 +229,7 @@ export default function DisplayLoginRecords(props) {
         display:"flex",
         justifyContent:"center"}}><table ref={tableRef}>
         <thead>
-        <tr key={"header"}>{Object.keys({"File ID":"", "Generated Text":"", "Mask off audio":"", "Mask on audio":"", "Date created":""}).map((key) => (<th key={uuidv4()}>{key}</th>))}</tr>
+        <tr key={"header"}>{Object.keys({"File ID":"", "Generated Text":"", "Mask off audio":"", "Mask on audio":"", "Country":"", "Gender":"", "Mask type":"", "Date created":""}).map((key) => (<th key={uuidv4()}>{key}</th>))}</tr>
         </thead>
         <tbody>
         {dataFilter.map((item) => (
@@ -240,7 +249,13 @@ export default function DisplayLoginRecords(props) {
                   height={35}
                   width={35}
                   /></a></td>}
-            {!item["nomasked_file_uploaded"] && <td key={uuidv4()}>No file uploaded</td>}
+            {!item["nomasked_file_uploaded"] && <td key={uuidv4()}><Image
+                  priority
+                  src="/images/nofile.webp"
+                  className={utilStyles.borderCircle}
+                  height={40}
+                  width={50}
+                  /></td>}
             {item["masked_file_uploaded"]===1 && <td key={uuidv4()}><a onClick={() => {handleShowVoicePopup(item["file_id"], true)}}><Image
                   priority
                   src="/images/play.png"
@@ -254,7 +269,16 @@ export default function DisplayLoginRecords(props) {
                   height={35}
                   width={35}
                   /></a></td>}
-            {!item["masked_file_uploaded"] && <td key={uuidv4()}>No file uploaded</td>}
+            {!item["masked_file_uploaded"] && <td key={uuidv4()}><Image
+                  priority
+                  src="/images/nofile.webp"
+                  className={utilStyles.borderCircle}
+                  height={40}
+                  width={50}
+                  /></td>}
+            <td key={uuidv4()}>{item["country"]}</td>
+            <td key={uuidv4()}>{item["gender"]}</td>
+            <td key={uuidv4()}>{item["mask_type"]}</td>
             <td key={uuidv4()}>{item["created_at_str"]}</td>
           </tr>
         ))}
@@ -393,9 +417,24 @@ export default function DisplayLoginRecords(props) {
           width: 38%;
           border-right: 1px solid #ddd;
         }
+        table tr td:nth-child(3){
+          width: 38%;
+          border-right: 1px solid #ddd;
+        }
         table tr td:nth-child(4){
           width: 38%;
-          border-left: 1px solid #ddd; 
+          border-right: 1px solid #ddd;
+        }
+        table tr td:nth-child(5){
+          width: 38%;
+          border-right: 1px solid #ddd;
+        }
+        table tr td:nth-child(6){
+          width: 38%;
+          border-right: 1px solid #ddd;
+        }
+        table tr td:nth-child(7){
+          width: 38%;
           border-right: 1px solid #ddd;
         }
         table
@@ -406,44 +445,6 @@ export default function DisplayLoginRecords(props) {
           width: 100%;
           min-width: 725px;
           height: 100%;
-        }
-        table tr th:nth-child(1){
-          width: 18%;
-        }
-        table tr th:nth-child(2){
-          width: 25%;
-        }
-        table tr th:nth-child(3){
-          width: 20%;
-        }
-        table tr th:nth-child(4){
-          width: 20%;
-        }
-
-        .table-view tr td:nth-child(1){
-          width: 38%;
-          border-right: 1px solid #ddd;
-        }
-        .table-view tr td:nth-child(2){
-          width: 38%;
-          border-right: 1px solid #ddd;
-        }
-        .table-view tr td:nth-child(4){
-          width: 38%;
-          border-left: 1px solid #ddd; 
-          border-right: 1px solid #ddd;
-        }
-        .table-view tr th:nth-child(1){
-          width: 15%;
-        }
-        .table-view tr th:nth-child(2){
-          width: 40%;
-        }
-        .table-view tr th:nth-child(3){
-          width: 17.5%;
-        }
-        .table-view tr th:nth-child(4){
-          width: 17.5%;
         }
 
         a { 

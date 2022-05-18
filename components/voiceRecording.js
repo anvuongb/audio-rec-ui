@@ -3,11 +3,13 @@ import styles from './layout.module.css'
 import Link from 'next/link'
 import utilStyles from '../styles/utils.module.css'
 import dynamic from "next/dynamic";
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+import countryList from 'react-select-country-list'
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios'
 import {urlBase, maxVoiceLength} from '../constant/url'
 import {useRouter} from 'next/router'
+import Select from 'react-select'
 
 const ReactMic = dynamic(
   () => {
@@ -39,6 +41,56 @@ export default function VoiceRecording(props) {
     const [secondVoiceComplete, setSecondVoiceComplete] = useState(false);
 
     const [audioLengthAccept, setAudioLengthAccept] = useState(true);
+
+    // country selector
+    const [valueCountry, setValueCountry] = useState('')
+    const optionsCountry = useMemo(() => countryList().setLabel('TW', 'Taiwan').getData(), [])
+    const countryChangeHandler = value => {
+      setValueCountry(value)
+    }
+
+    // gender selector
+    const [valueGender, setValueGender] = useState('')
+    const optionGender = [{
+      label: "Male",
+      value: "Male",
+    },
+    {
+      label: "Female",
+      value: "Female",
+    }
+  ]
+    const genderChangeHandler = value => {
+      setValueGender(value)
+    }
+
+    // mask selector
+    const [valueMask, setValueMask] = useState('')
+    const optionsMask = [{
+      label: "KN95",
+      value: "KN95",
+    },
+    {
+      label: "Cloth",
+      value: "Cloth",
+    },
+    {
+      label: "Surgical",
+      value: "Surgical",
+    },
+    {
+      label: "Other (Please specify)",
+      value: "Other",
+    }
+  ]
+    const maskChangeHandler = value => {
+      setValueMask(value)
+    }
+    // manual mask selector
+    const [valueMaskManual, setValueMaskManual] = useState('')
+    const maskManualChangeHandler = event => {
+      setValueMaskManual(event.target.value)
+    }
 
     function clearState() {
         setErrorVoice("");
@@ -144,6 +196,13 @@ export default function VoiceRecording(props) {
         formData.append("generated_text", generatedText);
         formData.append("sound_rate", 44100);
         formData.append("masked", 0);
+        formData.append("gender", valueGender.value);
+        formData.append("country", valueCountry.label);
+        if (valueMask.value === "Other") {
+          formData.append("mask_type", valueMaskManual);
+        } else {
+          formData.append("mask_type", valueMask.value);
+        }
 
         try {
             const response = await axios.post( 
@@ -278,6 +337,7 @@ export default function VoiceRecording(props) {
               }}>
               
               {!firstVoiceComplete && <div>Record the following sentence&nbsp;<b>without</b>&nbsp;mask</div>}
+              
               {firstVoiceComplete && !secondVoiceComplete && <div>Record the following sentence&nbsp;<b>with</b>&nbsp;mask</div>}
               {secondVoiceComplete && <div>
               Thank you for your participation.
@@ -287,8 +347,39 @@ export default function VoiceRecording(props) {
               {secondVoiceComplete && <div className={styles.backToHome}>
                   <a onClick={() => {window.location.href="/"}}>← Do it again?</a>
                 </div>}
-
-              
+              {!firstVoiceComplete && <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}><small><i><br />If you are not comfortable sharing the following information, <br />feel free to leave them unselected</i></small></div>}
+              {!firstVoiceComplete && <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+              <Select options={optionsCountry} value={valueCountry} onChange={countryChangeHandler} placeholder='Select Country'/>
+              <Select options={optionGender} value={valueGender} onChange={genderChangeHandler} placeholder='Select Gender'/>
+              <Select options={optionsMask} value={valueMask} onChange={maskChangeHandler} placeholder='Mask type'/>
+              </div>}
+              {valueMask.value==="Other" && !firstVoiceComplete &&
+                <div style={{
+                  display:"flex",
+                  justifyContent:"center",
+              }}>
+                  <form>
+                    <label htmlFor="mask">Mask type:&nbsp; &nbsp; </label>
+                    <input
+                      type="text"
+                      id="mask"
+                      name="mask"
+                      value={valueMaskManual}
+                      onChange={maskManualChangeHandler}
+                      style={{
+                        height:"40px",
+                        width:"300px",
+                        fontSize:"20px",
+                      }}
+                    />
+                  </form>
+                </div>}
               {!loadingSubmitVoice && showVoice &&<div style={{
                     display:"flex",
                     justifyContent:"center",
@@ -367,7 +458,7 @@ export default function VoiceRecording(props) {
         <style jsx>{`
         
         .face {
-          max-width: 550px;
+          max-width: 700px;
           margin: 0 auto;
           padding: 1rem;
           border: 1px solid #ccc;
