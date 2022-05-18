@@ -195,7 +195,7 @@ export default function VoiceRecording(props) {
         formData.append("file_id", fileId);
         formData.append("generated_text", generatedText);
         formData.append("sound_rate", 44100);
-        formData.append("masked", 0);
+        formData.append("masked", 1);
         formData.append("gender", valueGender.value);
         formData.append("country", valueCountry.label);
         if (valueMask.value === "Other") {
@@ -256,7 +256,7 @@ export default function VoiceRecording(props) {
         formData.append("file_id", fileId);
         formData.append("generated_text", generatedText);
         formData.append("sound_rate", 44100);
-        formData.append("masked", 1);
+        formData.append("masked", 0);
 
         try {
             const response = await axios.post( 
@@ -336,9 +336,9 @@ export default function VoiceRecording(props) {
                   justifyContent:"center",
               }}>
               
-              {!firstVoiceComplete && <div>Record the following sentence&nbsp;<b>without</b>&nbsp;mask</div>}
+              {!firstVoiceComplete && <div>Record the following sentence&nbsp;<b>with</b>&nbsp;mask</div>}
               
-              {firstVoiceComplete && !secondVoiceComplete && <div>Record the following sentence&nbsp;<b>with</b>&nbsp;mask</div>}
+              {firstVoiceComplete && !secondVoiceComplete && <div>Record the following sentence&nbsp;<b>without</b>&nbsp;mask</div>}
               {secondVoiceComplete && <div>
               Thank you for your participation.
               Your recording ID is&nbsp;<b>{fileId}</b>, contact us with this ID if you want your record removed.
