@@ -229,33 +229,13 @@ export default function DisplayLoginRecords(props) {
         display:"flex",
         justifyContent:"center"}}><table ref={tableRef}>
         <thead>
-        <tr key={"header"}>{Object.keys({"File ID":"", "Generated Text":"", "Mask off audio":"", "Mask on audio":"", "Country":"", "Gender":"", "Mask type":"", "Date created":""}).map((key) => (<th key={uuidv4()}>{key}</th>))}</tr>
+        <tr key={"header"}>{Object.keys({"File ID":"", "Generated Text":"", "Mask on audio":"", "Mask off audio":"", "Country":"", "Gender":"", "Mask type":"", "Date created":""}).map((key) => (<th key={uuidv4()}>{key}</th>))}</tr>
         </thead>
         <tbody>
         {dataFilter.map((item) => (
           <tr key={uuidv4()}>
             <td key={uuidv4()}>{item["file_id"]}</td>
             <td key={uuidv4()}>{item["generated_text"]}</td>
-            {item["nomasked_file_uploaded"]===1 && <td key={uuidv4()}><a onClick={() => {handleShowVoicePopup(item["file_id"], false)}}><Image
-                  priority
-                  src="/images/play.png"
-                  className={utilStyles.borderCircle}
-                  height={35}
-                  width={35}
-                  /></a> <a href={urlBase + '/api/getAudioRaw/'+ item["file_id"] + '_nomasked.wav'}><Image
-                  priority
-                  src="/images/Download.png"
-                  className={utilStyles.borderCircle}
-                  height={35}
-                  width={35}
-                  /></a></td>}
-            {!item["nomasked_file_uploaded"] && <td key={uuidv4()}><Image
-                  priority
-                  src="/images/nofile.webp"
-                  className={utilStyles.borderCircle}
-                  height={40}
-                  width={50}
-                  /></td>}
             {item["masked_file_uploaded"]===1 && <td key={uuidv4()}><a onClick={() => {handleShowVoicePopup(item["file_id"], true)}}><Image
                   priority
                   src="/images/play.png"
@@ -270,6 +250,26 @@ export default function DisplayLoginRecords(props) {
                   width={35}
                   /></a></td>}
             {!item["masked_file_uploaded"] && <td key={uuidv4()}><Image
+                  priority
+                  src="/images/nofile.webp"
+                  className={utilStyles.borderCircle}
+                  height={40}
+                  width={50}
+                  /></td>}
+            {item["nomasked_file_uploaded"]===1 && <td key={uuidv4()}><a onClick={() => {handleShowVoicePopup(item["file_id"], false)}}><Image
+                  priority
+                  src="/images/play.png"
+                  className={utilStyles.borderCircle}
+                  height={35}
+                  width={35}
+                  /></a> <a href={urlBase + '/api/getAudioRaw/'+ item["file_id"] + '_nomasked.wav'}><Image
+                  priority
+                  src="/images/Download.png"
+                  className={utilStyles.borderCircle}
+                  height={35}
+                  width={35}
+                  /></a></td>}
+            {!item["nomasked_file_uploaded"] && <td key={uuidv4()}><Image
                   priority
                   src="/images/nofile.webp"
                   className={utilStyles.borderCircle}
